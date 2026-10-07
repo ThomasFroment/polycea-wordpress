@@ -1,5 +1,5 @@
 resource "aws_vpc" "vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr_block
 
   tags = {
     Name = "PolyceaVPC"
@@ -17,7 +17,7 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "public" {
   count             = 2
   vpc_id            = aws_vpc.vpc.id
-  cidr_block        = ["10.0.1.0/24", "10.0.2.0/24"][count.index]
+  cidr_block        = var.public_subnet_cidr_blocks[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
@@ -28,7 +28,7 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   count             = 2
   vpc_id            = aws_vpc.vpc.id
-  cidr_block        = ["10.0.3.0/24", "10.0.4.0/24"][count.index]
+  cidr_block        = var.private_subnet_cidr_blocks[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
@@ -37,7 +37,7 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_eip" "nat" {
-  count      = 2
+  count      = var.only_one_nat_gateway ? 1 : 2
   domain     = "vpc"
   depends_on = [aws_internet_gateway.igw]
 
@@ -47,7 +47,7 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "nat" {
-  count         = 2
+  count         = var.only_one_nat_gateway ? 1 : 2
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
   depends_on    = [aws_internet_gateway.igw]
@@ -76,7 +76,7 @@ resource "aws_route_table" "private" {
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat[count.index].id
+    nat_gateway_id = aws_nat_gateway.nat[var.only_one_nat_gateway ? 0 : count.index].id
   }
 
   tags = {

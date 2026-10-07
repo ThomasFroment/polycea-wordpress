@@ -19,11 +19,6 @@ terraform {
 provider "aws" {
   region = "eu-west-3"
 
-  assume_role {
-    role_arn     = var.role_arn
-    session_name = "terraform"
-  }
-
   default_tags {
     tags = {
       Project     = var.project_name

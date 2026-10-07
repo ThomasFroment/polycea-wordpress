@@ -6,6 +6,14 @@ terraform {
       version = "~> 6.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "polycea-wordpress-terraform-tfstate-bucket"
+    key          = "terraform.tfstate"
+    region       = "eu-west-3"
+    use_lockfile = true
+    encrypt      = true
+  }
 }
 
 provider "aws" {
@@ -20,11 +28,6 @@ provider "aws" {
   }
 }
 
-resource "aws_s3_bucket" "terraformState" {
-  bucket        = "${var.project_name}-terraform-tfstate-bucket"
-  force_destroy = true
-
-  tags = {
-    Name = "Terraform State Bucket"
-  }
+data "aws_availability_zones" "available" {
+  state = "available"
 }

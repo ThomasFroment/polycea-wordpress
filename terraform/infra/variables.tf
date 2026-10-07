@@ -3,6 +3,11 @@ variable "project_name" {
   type        = string
 }
 
+variable "project_name_short" {
+  description = "A short name for the project."
+  type        = string
+}
+
 variable "region" {
   description = "The AWS region to deploy resources in."
   default     = "eu-west-3"

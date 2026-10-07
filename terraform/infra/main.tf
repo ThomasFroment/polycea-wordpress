@@ -28,6 +28,10 @@ provider "aws" {
   }
 }
 
+locals {
+  name_suffix = "${var.project_name_short}-${var.environment}"
+}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }

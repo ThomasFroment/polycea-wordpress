@@ -2,7 +2,7 @@ resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr_block
 
   tags = {
-    Name = "PolyceaVPC"
+    Name = "PolyceaVPC-${local.name_suffix}"
   }
 }
 
@@ -10,7 +10,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "PolyceaIGW"
+    Name = "PolyceaIGW-${local.name_suffix}"
   }
 }
 
@@ -21,7 +21,7 @@ resource "aws_subnet" "public" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "PublicSubnet-${count.index == 0 ? "A" : "B"}"
+    Name = "PublicSubnet-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "PrivateSubnet-${count.index == 0 ? "A" : "B"}"
+    Name = "PrivateSubnet-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
   }
 }
 
@@ -42,7 +42,7 @@ resource "aws_eip" "nat" {
   depends_on = [aws_internet_gateway.igw]
 
   tags = {
-    Name = "PolyceaEIP-${count.index == 0 ? "A" : "B"}"
+    Name = "PolyceaEIP-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
   }
 }
 
@@ -53,7 +53,7 @@ resource "aws_nat_gateway" "nat" {
   depends_on    = [aws_internet_gateway.igw]
 
   tags = {
-    Name = "PolyceaNAT-${count.index == 0 ? "A" : "B"}"
+    Name = "PolyceaNAT-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
   }
 }
 
@@ -66,7 +66,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "PolyceaPublicRT"
+    Name = "PolyceaPublicRT-${local.name_suffix}"
   }
 }
 
@@ -80,7 +80,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "PolyceaPrivateRT-${count.index == 0 ? "A" : "B"}"
+    Name = "PolyceaPrivateRT-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
   }
 }
 

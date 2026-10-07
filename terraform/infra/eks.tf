@@ -1,5 +1,5 @@
 resource "aws_eks_cluster" "EKSCluster" {
-  name     = "eks-cluster-${var.project_name}-${var.environment}"
+  name     = "eks-cluster-${local.name_suffix}"
   role_arn = aws_iam_role.EKSClusterRole.arn
 
   vpc_config {
@@ -7,7 +7,7 @@ resource "aws_eks_cluster" "EKSCluster" {
   }
 
   tags = {
-    Name = "EKSCluster-${var.project_name}-${var.environment}"
+    Name = "EKSCluster-${local.name_suffix}"
   }
 
   depends_on = [
@@ -17,7 +17,7 @@ resource "aws_eks_cluster" "EKSCluster" {
 
 resource "aws_eks_node_group" "EKSNodeGroup" {
   cluster_name    = aws_eks_cluster.EKSCluster.name
-  node_group_name = "eks-node-group-${var.project_name}-${var.environment}"
+  node_group_name = "eks-node-group-${local.name_suffix}"
   node_role_arn   = aws_iam_role.EKSNodeGroupRole.arn
   subnet_ids      = [aws_subnet.private[0].id, aws_subnet.private[1].id]
 
@@ -30,7 +30,7 @@ resource "aws_eks_node_group" "EKSNodeGroup" {
   instance_types = var.eks_instance_types
 
   tags = {
-    Name = "EKSNodeGroup-${var.project_name}-${var.environment}"
+    Name = "EKSNodeGroup-${local.name_suffix}"
   }
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,

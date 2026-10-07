@@ -21,7 +21,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraformState" {
-  bucket        = "${var.project_name}-tfstate-bucket"
+  bucket        = "${var.project_name}-terraform-tfstate-bucket"
   force_destroy = true
 
   tags = {

@@ -8,7 +8,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "polycea-wordpress-tfstate-bucket"
+    bucket       = "polycea-wordpress-terraform-tfstate-bucket"
     key          = "terraform.tfstate"
     region       = "eu-west-3"
     use_lockfile = true

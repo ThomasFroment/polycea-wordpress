@@ -3,6 +3,12 @@ variable "project_name" {
   type        = string
 }
 
+variable "region" {
+  description = "The AWS region to deploy resources in."
+  default     = "eu-west-3"
+  type        = string
+}
+
 variable "environment" {
   description = "The environment for the resources."
   type        = string
@@ -30,4 +36,10 @@ variable "only_one_nat_gateway" {
   description = "Whether to create only one NAT gateway (true) or two (false)."
   default     = false
   type        = bool
+}
+
+variable "eks_instance_types" {
+  description = "The instance types for the EKS node group."
+  default     = ["t3.small"]
+  type        = list(string)
 }

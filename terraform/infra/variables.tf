@@ -37,3 +37,9 @@ variable "only_one_nat_gateway" {
   default     = false
   type        = bool
 }
+
+variable "eks_instance_types" {
+  description = "The instance types for the EKS node group."
+  default     = ["t3.small"]
+  type        = list(string)
+}

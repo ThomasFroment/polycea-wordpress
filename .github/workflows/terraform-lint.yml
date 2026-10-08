@@ -28,3 +28,8 @@ jobs:
           terraform init -backend=false
           terraform validate
 
+      - name: Lint Helm Charts (storage-class)
+        run: helm lint ./helm/storage-class
+
+      - name: Lint Helm Charts (wordpress)
+        run: helm lint ./helm/wordpress

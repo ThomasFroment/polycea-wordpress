@@ -48,3 +48,15 @@ variable "eks_instance_types" {
   default     = ["t3.small"]
   type        = list(string)
 }
+
+variable "rds_instance_type" {
+  description = "The instance type for the RDS."
+  default     = "db.t3.micro"
+  type        = string
+}
+
+variable "rds_multi_az" {
+  description = "Whether to create the RDS instance in multiple AZs (true) or a single AZ (false)."
+  default     = true
+  type        = bool
+}

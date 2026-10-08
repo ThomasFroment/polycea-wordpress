@@ -43,4 +43,4 @@ jobs:
       - name: Terraform Apply
         working-directory: ./terraform/infra
         run: |
-          terraform apply -var-file=./terraform/infra/${{ inputs.environment }}.tfvars -auto-approve
+          terraform apply -var-file=./env/${{ inputs.environment }}.tfvars -auto-approve

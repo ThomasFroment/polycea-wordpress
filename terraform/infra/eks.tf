@@ -1,6 +1,6 @@
-resource "aws_eks_cluster" "EKSCluster" {
+resource "aws_eks_cluster" "this" {
   name     = "eks-cluster-${local.name_suffix}"
-  role_arn = aws_iam_role.EKSClusterRole.arn
+  role_arn = aws_iam_role.cluster.arn
 
   vpc_config {
     subnet_ids = [aws_subnet.private[0].id, aws_subnet.private[1].id]
@@ -11,14 +11,14 @@ resource "aws_eks_cluster" "EKSCluster" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.cluster_policy
   ]
 }
 
-resource "aws_eks_node_group" "EKSNodeGroup" {
-  cluster_name    = aws_eks_cluster.EKSCluster.name
+resource "aws_eks_node_group" "this" {
+  cluster_name    = aws_eks_cluster.this.name
   node_group_name = "eks-node-group-${local.name_suffix}"
-  node_role_arn   = aws_iam_role.EKSNodeGroupRole.arn
+  node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = [aws_subnet.private[0].id, aws_subnet.private[1].id]
 
   scaling_config {
@@ -33,10 +33,8 @@ resource "aws_eks_node_group" "EKSNodeGroup" {
     Name = "EKSNodeGroup-${local.name_suffix}"
   }
   depends_on = [
-    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
+    aws_iam_role_policy_attachment.node_worker,
+    aws_iam_role_policy_attachment.node_cni,
+    aws_iam_role_policy_attachment.node_ecr
   ]
 }
-
-

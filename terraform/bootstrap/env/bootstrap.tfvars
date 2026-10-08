@@ -1,2 +1,3 @@
-project_name = "polycea-wordpress"
-environment  = "bootstrap"
+project_name       = "polycea-wordpress"
+project_name_short = "poly-wp"
+environment        = "bootstrap"

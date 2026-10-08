@@ -1,0 +1,20 @@
+appName: wordpress
+replicaCount: 2
+
+image:
+  repository: wordpress
+  tag: 7.1.2-apache
+
+containerPort: 80
+
+service:
+  type: ClusterIP
+  port: 80
+
+db:
+  host: ""
+  user: ""
+  name: ""
+  password: ""
+
+scName: efs-sc

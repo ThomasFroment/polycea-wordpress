@@ -1,0 +1,46 @@
+name: "Terraform Apply"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target Environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  apply-infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: "eu-west-3"
+
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Terraform Init
+        working-directory: ./terraform/infra
+        run: terraform init
+
+      - name: Terraform Workspace Select
+        working-directory: ./terraform/infra
+        run: |
+          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
+
+      - name: Terraform Apply
+        working-directory: ./terraform/infra
+        run: |
+          terraform apply -var-file=./terraform/infra/${{ inputs.environment }}.tfvars -auto-approve

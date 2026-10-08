@@ -3,6 +3,11 @@ variable "project_name" {
   type        = string
 }
 
+variable "project_name_short" {
+  description = "A short name for the project."
+  type        = string
+}
+
 variable "region" {
   description = "The AWS region to deploy resources in."
   default     = "eu-west-3"
@@ -42,4 +47,28 @@ variable "eks_instance_types" {
   description = "The instance types for the EKS node group."
   default     = ["t3.small"]
   type        = list(string)
+}
+
+variable "rds_instance_type" {
+  description = "The instance type for the RDS."
+  default     = "db.t3.micro"
+  type        = string
+}
+
+variable "rds_multi_az" {
+  description = "Whether to create the RDS instance in multiple AZs (true) or a single AZ (false)."
+  default     = true
+  type        = bool
+}
+
+variable "rds_db_name" {
+  description = "The name of the RDS database (alphanumeric only)."
+  default     = "mydb"
+  type        = string
+}
+
+variable "rds_username" {
+  description = "The username for the RDS database (alphanumeric only)."
+  default     = "admin"
+  type        = string
 }

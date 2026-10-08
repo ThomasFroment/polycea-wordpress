@@ -21,3 +21,9 @@ jobs:
         run: |
           terraform init -backend=false
           terraform validate
+
+      - name: Validate Infra
+        working-directory: ./terraform/infra
+        run: |
+          terraform init -backend=false
+          terraform validate

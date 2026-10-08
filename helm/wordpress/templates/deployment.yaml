@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}-deployment
+  labels:
+    app: {{ .Values.appName }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+    spec:
+      containers:
+      - name: {{ .Values.appName }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        env:
+          - name: WORDPRESS_DB_HOST
+            value: {{ .Values.db.host }}
+          - name: WORDPRESS_DB_USER
+            value: {{ .Values.db.user }}
+          - name: WORDPRESS_DB_NAME
+            value: {{ .Values.db.name }}
+          - name: WORDPRESS_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.appName }}-secret
+                key: WORDPRESS_DB_PASSWORD
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+        volumeMounts:
+          - name: {{ .Values.appName }}-uploads
+            mountPath: /var/www/html/wp-content/uploads
+      volumes:
+        - name: {{ .Values.appName }}-uploads
+          persistentVolumeClaim:
+            claimName: {{ .Values.appName }}-pvc

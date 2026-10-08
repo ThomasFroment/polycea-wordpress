@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 
   backend "s3" {
@@ -26,6 +30,10 @@ provider "aws" {
       Environment = var.environment
     }
   }
+}
+
+locals {
+  name_suffix = "${var.project_name_short}-${var.environment}"
 }
 
 data "aws_availability_zones" "available" {

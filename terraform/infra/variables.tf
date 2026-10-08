@@ -60,3 +60,15 @@ variable "rds_multi_az" {
   default     = true
   type        = bool
 }
+
+variable "rds_db_name" {
+  description = "The name of the RDS database (alphanumeric only)."
+  default     = "mydb"
+  type        = string
+}
+
+variable "rds_username" {
+  description = "The username for the RDS database (alphanumeric only)."
+  default     = "admin"
+  type        = string
+}

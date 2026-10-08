@@ -28,12 +28,12 @@ resource "aws_ssm_parameter" "rds_name" {
 
 resource "aws_db_instance" "this" {
   allocated_storage = 20
-  db_name           = "mydb-${local.name_suffix}"
+  db_name           = var.rds_db_name
   engine            = "mysql"
   engine_version    = "8.4.11"
   instance_class    = var.rds_instance_type
 
-  username = var.project_name_short
+  username = var.rds_username
   password = random_password.rds.result
 
   skip_final_snapshot = true
@@ -42,6 +42,10 @@ resource "aws_db_instance" "this" {
   vpc_security_group_ids = [aws_security_group.rds.id]
 
   multi_az = var.rds_multi_az
+
+  tags = {
+    Name        = "rds-${local.name_suffix}"
+  }
 }
 
 resource "aws_db_subnet_group" "this" {

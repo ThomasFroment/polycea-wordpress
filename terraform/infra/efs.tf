@@ -19,7 +19,7 @@ resource "aws_ssm_parameter" "efs" {
   value = aws_efs_file_system.efs.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_nfs_ipv4" {
+resource "aws_vpc_security_group_ingress_rule" "allow_nfs" {
   security_group_id            = aws_security_group.efs.id
   from_port                    = 2049
   to_port                      = 2049

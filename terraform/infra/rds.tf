@@ -44,7 +44,7 @@ resource "aws_db_instance" "this" {
   multi_az = var.rds_multi_az
 
   tags = {
-    Name        = "rds-${local.name_suffix}"
+    Name = "rds-${local.name_suffix}"
   }
 }
 

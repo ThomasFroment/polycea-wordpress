@@ -16,19 +16,19 @@ on:
     outputs:
       eks_cluster_name:
         description: "EKS Cluster Name"
-        value: ${{ jobs.terraform.outputs.eks_cluster_name }}
+        value: ${{ jobs.terraform-apply.outputs.eks_cluster_name }}
       efs_id:
         description: "EFS ID"
-        value: ${{ jobs.terraform.outputs.efs_id }}
+        value: ${{ jobs.terraform-apply.outputs.efs_id }}
       rds_name:
         description: "RDS Name"
-        value: ${{ jobs.terraform.outputs.rds_name }}
+        value: ${{ jobs.terraform-apply.outputs.rds_name }}
       rds_endpoint:
         description: "RDS Endpoint"
-        value: ${{ jobs.terraform.outputs.rds_endpoint }}
+        value: ${{ jobs.terraform-apply.outputs.rds_endpoint }}
       rds_username:
         description: "RDS Username"
-        value: ${{ jobs.terraform.outputs.rds_username }}
+        value: ${{ jobs.terraform-apply.outputs.rds_username }}
   workflow_dispatch:
     inputs:
       environment:

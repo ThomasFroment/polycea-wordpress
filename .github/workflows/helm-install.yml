@@ -58,7 +58,7 @@ jobs:
       - name: Get RDS password from AWS Parameter Store
         id: get-rds-password
         run: |
-          RDS_PASSWORD=$(aws ssm get-parameter --name "/${{ needs.terraform.outputs.rds_name }}/rds-password" --with-decryption --query "Parameter.Value" --output text)
+          RDS_PASSWORD=$(aws ssm get-parameter --name "/${{ needs.terraform.outputs.rds_name }}/${{inputs.environment}}/db-password" --with-decryption --query "Parameter.Value" --output text)
           echo "::add-mask::$RDS_PASSWORD"
           echo "RDS_PASSWORD=$RDS_PASSWORD" >> $GITHUB_ENV
 

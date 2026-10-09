@@ -11,6 +11,11 @@ on:
         options:
           - dev
           - prod
+      region:
+        description: "AWS Region"
+        required: true
+        default: "eu-west-3"
+        type: string
 
 permissions:
   id-token: write
@@ -26,7 +31,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: "eu-west-3"
+          aws-region: ${{ inputs.region }}
 
       - name: HashiCorp - Setup Terraform
         uses: hashicorp/setup-terraform@v4

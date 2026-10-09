@@ -13,12 +13,6 @@ resource "aws_efs_mount_target" "efs" {
   security_groups = [aws_security_group.efs.id]
 }
 
-resource "aws_ssm_parameter" "efs" {
-  name  = "/${var.project_name}/${var.environment}/efs-id"
-  type  = "String"
-  value = aws_efs_file_system.efs.id
-}
-
 resource "aws_vpc_security_group_ingress_rule" "allow_nfs" {
   security_group_id            = aws_security_group.efs.id
   from_port                    = 2049

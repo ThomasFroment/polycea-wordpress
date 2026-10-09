@@ -1,6 +1,34 @@
 name: "Terraform Apply"
 
 on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Target Environment"
+        required: true
+        default: "dev"
+        type: string
+      region:
+        description: "AWS Region"
+        required: true
+        default: "eu-west-3"
+        type: string
+    outputs:
+      eks_cluster_name:
+        description: "EKS Cluster Name"
+        value: ${{ jobs.terraform.outputs.eks_cluster_name }}
+      efs_id:
+        description: "EFS ID"
+        value: ${{ jobs.terraform.outputs.efs_id }}
+      rds_name:
+        description: "RDS Name"
+        value: ${{ jobs.terraform.outputs.rds_name }}
+      rds_endpoint:
+        description: "RDS Endpoint"
+        value: ${{ jobs.terraform.outputs.rds_endpoint }}
+      rds_username:
+        description: "RDS Username"
+        value: ${{ jobs.terraform.outputs.rds_username }}
   workflow_dispatch:
     inputs:
       environment:
@@ -22,8 +50,24 @@ permissions:
   contents: read
 
 jobs:
-  apply-infra:
+  lint:
     runs-on: ubuntu-latest
+    steps:
+      - name: "Terraform Lint"
+        uses: ./.github/workflows/terraform-lint.yml
+
+      - name: "Helm Lint"
+        uses: ./.github/workflows/helm-lint.yml
+
+  terraform-apply:
+    runs-on: ubuntu-latest
+    outputs:
+      eks_cluster_name: ${{ steps.terraform-output.outputs.eks_cluster_name }}
+      efs_id: ${{ steps.terraform-output.outputs.efs_id }}
+      rds_name: ${{ steps.terraform-output.outputs.rds_name }}
+      rds_endpoint: ${{ steps.terraform-output.outputs.rds_endpoint }}
+      rds_username: ${{ steps.terraform-output.outputs.rds_username }}
+
     steps:
       - uses: actions/checkout@v7
 
@@ -49,3 +93,13 @@ jobs:
         working-directory: ./terraform/infra
         run: |
           terraform apply -var-file=./env/${{ inputs.environment }}.tfvars -auto-approve
+
+      - name: Terraform Output
+        id: terraform-output
+        working-directory: ./terraform/infra
+        run: |
+          echo "eks_cluster_name=$(terraform output -raw eks_cluster_name)" >> $GITHUB_OUTPUT"
+          echo "efs_id=$(terraform output -raw efs_id)" >> $GITHUB_OUTPUT"
+          echo "rds_name=$(terraform output -raw rds_name)" >> $GITHUB_OUTPUT"
+          echo "rds_endpoint=$(terraform output -raw rds_endpoint)" >> $GITHUB_OUTPUT"
+          echo "rds_username=$(terraform output -raw rds_username)" >> $GITHUB_OUTPUT"

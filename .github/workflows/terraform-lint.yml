@@ -1,11 +1,12 @@
 name: "Terraform Lint & Validate"
 
 on:
+  workflow_call:
   push:
   pull_request:
 
 jobs:
-  terraform-lint-validate:
+  terraform-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

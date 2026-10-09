@@ -50,18 +50,14 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Terraform Lint"
-        uses: ./.github/workflows/terraform-lint.yml
+  terraform-lint:
+    uses: ./.github/workflows/terraform-lint.yml
 
-      - name: "Helm Lint"
-        uses: ./.github/workflows/helm-lint.yml
+  helm-lint:
+    uses: ./.github/workflows/helm-lint.yml
 
   terraform-apply:
     runs-on: ubuntu-latest
-    needs: lint
     outputs:
       eks_cluster_name: ${{ steps.terraform-output.outputs.eks_cluster_name }}
       efs_id: ${{ steps.terraform-output.outputs.efs_id }}

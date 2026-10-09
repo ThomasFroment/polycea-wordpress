@@ -2,30 +2,6 @@ resource "random_password" "rds" {
   length = 16
 }
 
-resource "aws_ssm_parameter" "rds_password" {
-  name  = "/${var.project_name}/${var.environment}/db-password"
-  type  = "SecureString"
-  value = random_password.rds.result
-}
-
-resource "aws_ssm_parameter" "rds_username" {
-  name  = "/${var.project_name}/${var.environment}/db-username"
-  type  = "String"
-  value = var.project_name_short
-}
-
-resource "aws_ssm_parameter" "rds_endpoint" {
-  name  = "/${var.project_name}/${var.environment}/db-endpoint"
-  type  = "String"
-  value = aws_db_instance.this.endpoint
-}
-
-resource "aws_ssm_parameter" "rds_name" {
-  name  = "/${var.project_name}/${var.environment}/db-name"
-  type  = "String"
-  value = aws_db_instance.this.db_name
-}
-
 resource "aws_db_instance" "this" {
   allocated_storage = 20
   db_name           = var.rds_db_name

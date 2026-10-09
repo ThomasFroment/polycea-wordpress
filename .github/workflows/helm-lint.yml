@@ -1,6 +1,7 @@
 name: "Helm Lint"
 
 on:
+  workflow_call:
   push:
   pull_request:
 
@@ -8,7 +9,7 @@ jobs:
   helm-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Lint Helm Charts (storage-class)
         run: helm lint ./helm/storage-class

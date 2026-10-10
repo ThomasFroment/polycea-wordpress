@@ -22,3 +22,8 @@ output "rds_username" {
   description = "The username for the RDS database"
   value       = var.project_name_short
 }
+
+output "rds_password" {
+  description = "The password for the RDS database"
+  value       = random_password.rds_password.result
+}

@@ -29,6 +29,9 @@ on:
       rds_username:
         description: "RDS Username"
         value: ${{ jobs.terraform-apply.outputs.rds_username }}
+      rds_password:
+        description: "RDS Password"
+        value: ${{ jobs.terraform-apply.outputs.rds_password }}
   workflow_dispatch:
     inputs:
       environment:
@@ -65,6 +68,7 @@ jobs:
       rds_name: ${{ steps.terraform-output.outputs.rds_name }}
       rds_address: ${{ steps.terraform-output.outputs.rds_address }}
       rds_username: ${{ steps.terraform-output.outputs.rds_username }}
+      rds_password: ${{ steps.terraform-output.outputs.rds_password }}
 
     steps:
       - uses: actions/checkout@v7
@@ -101,3 +105,4 @@ jobs:
           echo "rds_name=$(terraform output -raw rds_name)" >> $GITHUB_OUTPUT
           echo "rds_address=$(terraform output -raw rds_address)" >> $GITHUB_OUTPUT
           echo "rds_username=$(terraform output -raw rds_username)" >> $GITHUB_OUTPUT
+          echo "rds_password=$(terraform output -raw rds_password)" >> $GITHUB_OUTPUT

@@ -54,19 +54,12 @@ jobs:
           helm upgrade --install storage-class ./helm/storage-class \
             --set efsFileSystemId=${{ needs.terraform.outputs.efs_id }} \
             --wait
-
-      - name: Get RDS password from AWS Parameter Store
-        id: get-rds-password
-        run: |
-          RDS_PASSWORD=$(aws ssm get-parameter --name "/${{ needs.terraform.outputs.rds_name }}/${{inputs.environment}}/db-password" --with-decryption --query "Parameter.Value" --output text)
-          echo "::add-mask::$RDS_PASSWORD"
-          echo "RDS_PASSWORD=$RDS_PASSWORD" >> $GITHUB_ENV
-
+            
       - name: Install wordpress Helm Chart
         run: |
           helm upgrade --install wordpress ./helm/wordpress \
             --set db.host=${{ needs.terraform.outputs.rds_address }} \
             --set db.user=${{ needs.terraform.outputs.rds_username }} \
             --set db.name=${{ needs.terraform.outputs.rds_name }} \
-            --set db.password=${{ env.RDS_PASSWORD }} \
+            --set db.password=${{ needs.terraform.outputs.rds_password }} \
             --wait

@@ -25,6 +25,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "PublicSubnet-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 

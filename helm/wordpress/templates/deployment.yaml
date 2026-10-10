@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}-deployment
+  name: "{{ .Values.appName }}-deployment"
   labels:
     app: {{ .Values.appName }}
 spec:
@@ -27,14 +27,14 @@ spec:
           - name: WORDPRESS_DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.appName }}-secret
+                name: "{{ .Values.appName }}-secret"
                 key: WORDPRESS_DB_PASSWORD
         ports:
         - containerPort: {{ .Values.containerPort }}
         volumeMounts:
-          - name: {{ .Values.appName }}-uploads
+          - name: "{{ .Values.appName }}-uploads"
             mountPath: /var/www/html/wp-content/uploads
       volumes:
-        - name: {{ .Values.appName }}-uploads
+        - name: "{{ .Values.appName }}-uploads"
           persistentVolumeClaim:
-            claimName: {{ .Values.appName }}-pvc
+            claimName: "{{ .Values.appName }}-pvc"

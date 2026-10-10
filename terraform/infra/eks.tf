@@ -57,11 +57,18 @@ resource "aws_eks_node_group" "this" {
   tags = {
     Name = "EKSNodeGroup-${local.name_suffix}"
   }
+
   depends_on = [
     aws_iam_role_policy_attachment.node_worker,
     aws_iam_role_policy_attachment.node_cni,
     aws_iam_role_policy_attachment.node_ecr
   ]
+
+  lifecycle {
+    replace_triggered_by = [
+      aws_eks_cluster.this,
+    ]
+  }
 }
 
 resource "aws_eks_addon" "efs_csi" {
@@ -69,9 +76,21 @@ resource "aws_eks_addon" "efs_csi" {
   addon_name   = "aws-efs-csi-driver"
 
   depends_on = [aws_eks_pod_identity_association.efs_csi, aws_eks_node_group.this]
+
+  lifecycle {
+    replace_triggered_by = [
+      aws_eks_cluster.this,
+    ]
+  }
 }
 
 resource "aws_eks_addon" "pod_identity" {
   cluster_name = aws_eks_cluster.this.name
   addon_name   = "eks-pod-identity-agent"
+
+  lifecycle {
+    replace_triggered_by = [
+      aws_eks_cluster.this,
+    ]
+  }
 }

@@ -13,9 +13,9 @@ output "rds_name" {
   value       = aws_db_instance.this.db_name
 }
 
-output "rds_endpoint" {
-  description = "The endpoint of the RDS database"
-  value       = aws_db_instance.this.endpoint
+output "rds_address" {
+  description = "The address of the RDS database"
+  value       = aws_db_instance.this.address
 }
 
 output "rds_username" {

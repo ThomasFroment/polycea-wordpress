@@ -23,9 +23,9 @@ on:
       rds_name:
         description: "RDS Name"
         value: ${{ jobs.terraform-apply.outputs.rds_name }}
-      rds_endpoint:
-        description: "RDS Endpoint"
-        value: ${{ jobs.terraform-apply.outputs.rds_endpoint }}
+      rds_address:
+        description: "RDS Address"
+        value: ${{ jobs.terraform-apply.outputs.rds_address }}
       rds_username:
         description: "RDS Username"
         value: ${{ jobs.terraform-apply.outputs.rds_username }}
@@ -63,7 +63,7 @@ jobs:
       eks_cluster_name: ${{ steps.terraform-output.outputs.eks_cluster_name }}
       efs_id: ${{ steps.terraform-output.outputs.efs_id }}
       rds_name: ${{ steps.terraform-output.outputs.rds_name }}
-      rds_endpoint: ${{ steps.terraform-output.outputs.rds_endpoint }}
+      rds_address: ${{ steps.terraform-output.outputs.rds_address }}
       rds_username: ${{ steps.terraform-output.outputs.rds_username }}
 
     steps:
@@ -99,5 +99,5 @@ jobs:
           echo "eks_cluster_name=$(terraform output -raw eks_cluster_name)" >> $GITHUB_OUTPUT
           echo "efs_id=$(terraform output -raw efs_id)" >> $GITHUB_OUTPUT
           echo "rds_name=$(terraform output -raw rds_name)" >> $GITHUB_OUTPUT
-          echo "rds_endpoint=$(terraform output -raw rds_endpoint)" >> $GITHUB_OUTPUT
+          echo "rds_address=$(terraform output -raw rds_address)" >> $GITHUB_OUTPUT
           echo "rds_username=$(terraform output -raw rds_username)" >> $GITHUB_OUTPUT

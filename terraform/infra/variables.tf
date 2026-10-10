@@ -25,6 +25,13 @@ variable "vpc_cidr_block" {
   type        = string
 }
 
+variable "eks_admin_role_arn" {
+  description = "The ARN of the EKS admin role."
+  default     = ""
+  sensitive   = true
+  type        = string
+}
+
 variable "public_subnet_cidr_blocks" {
   description = "The CIDR blocks for the public subnets."
   default     = ["10.1.1.0/24", "10.1.2.0/24"]

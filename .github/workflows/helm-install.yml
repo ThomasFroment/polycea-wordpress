@@ -56,10 +56,15 @@ jobs:
             --wait
             
       - name: Install wordpress Helm Chart
+        env:
+          DB_HOST: ${{ needs.terraform.outputs.rds_address }}
+          DB_USER: ${{ needs.terraform.outputs.rds_username }}
+          DB_NAME: ${{ needs.terraform.outputs.rds_name }}
+          DB_PASSWORD: ${{ needs.terraform.outputs.rds_password }}
         run: |
           helm upgrade --install wordpress ./helm/wordpress \
-            --set db.host=${{ needs.terraform.outputs.rds_address }} \
-            --set db.user=${{ needs.terraform.outputs.rds_username }} \
-            --set db.name=${{ needs.terraform.outputs.rds_name }} \
-            --set db.password=${{ needs.terraform.outputs.rds_password }} \
+            --set db.host="$DB_HOST" \
+            --set db.user="$DB_USER" \
+            --set db.name="$DB_NAME" \
+            --set db.password="$DB_PASSWORD" \
             --wait

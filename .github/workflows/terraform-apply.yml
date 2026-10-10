@@ -93,6 +93,8 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ./terraform/infra
+        env:
+          TF_VAR_eks_admin_role_arn: ${{ secrets.EKS_ADMIN_ROLE_ARN }}
         run: |
           terraform apply -var-file=./env/${{ inputs.environment }}.tfvars -auto-approve
 

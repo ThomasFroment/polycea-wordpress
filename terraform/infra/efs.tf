@@ -1,4 +1,4 @@
-resource "aws_efs_file_system" "efs" {
+resource "aws_efs_file_system" "this" {
   creation_token = "efs-${local.name_suffix}"
 
   tags = {
@@ -6,9 +6,9 @@ resource "aws_efs_file_system" "efs" {
   }
 }
 
-resource "aws_efs_mount_target" "efs" {
+resource "aws_efs_mount_target" "this" {
   count           = 2
-  file_system_id  = aws_efs_file_system.efs.id
+  file_system_id  = aws_efs_file_system.this.id
   subnet_id       = aws_subnet.private[count.index].id
   security_groups = [aws_security_group.efs.id]
 }

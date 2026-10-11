@@ -32,7 +32,7 @@ resource "aws_iam_role" "helm_oidc" {
 
 resource "aws_iam_role_policy_attachment" "helm_oidc" {
   role       = aws_iam_role.helm_oidc.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  policy_arn = aws_iam_role_policy.helm_oidc.arn
 }
 
 resource "aws_iam_role_policy" "helm_oidc" {

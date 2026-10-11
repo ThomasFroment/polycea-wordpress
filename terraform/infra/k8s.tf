@@ -12,6 +12,12 @@ resource "kubernetes_namespace_v1" "this" {
   metadata {
     name = var.project_name
   }
+
+  depends_on = [
+    aws_eks_cluster.this,
+    aws_eks_access_entry.this,
+    aws_eks_access_policy_association.this
+  ]
 }
 
 resource "kubernetes_storage_class_v1" "this" {
@@ -26,7 +32,11 @@ resource "kubernetes_storage_class_v1" "this" {
     fileSystemId     = aws_efs_file_system.this.id
     directoryPerms   = "700"
   }
+
   depends_on = [
+    aws_eks_cluster.this,
+    aws_eks_access_entry.this,
+    aws_eks_access_policy_association.this,
     aws_eks_addon.efs_csi
   ]
 }

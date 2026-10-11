@@ -3,7 +3,8 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.cluster.arn
 
   access_config {
-    authentication_mode = "API"
+    authentication_mode                         = "API"
+    bootstrap_cluster_creator_admin_permissions = true
   }
 
   vpc_config {

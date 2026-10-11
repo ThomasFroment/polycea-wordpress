@@ -1,4 +1,3 @@
-appName: wordpress
 replicaCount: 2
 
 image:

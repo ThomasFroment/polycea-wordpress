@@ -1,21 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{ .Values.appName }}-deployment"
+  name: "{{ .Release.Name }}-deployment"
   labels:
-    app: {{ .Values.appName }}
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      app: {{ .Chart.Name }}
+      release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.appName }}
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
     spec:
       containers:
-      - name: {{ .Values.appName }}
+      - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         env:
           - name: WORDPRESS_DB_HOST
@@ -27,14 +30,14 @@ spec:
           - name: WORDPRESS_DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: "{{ .Values.appName }}-secret"
+                name: "{{ .Release.Name }}-secret"
                 key: WORDPRESS_DB_PASSWORD
         ports:
         - containerPort: {{ .Values.containerPort }}
         volumeMounts:
-          - name: "{{ .Values.appName }}-uploads"
+          - name: uploads
             mountPath: /var/www/html/wp-content/uploads
       volumes:
-        - name: "{{ .Values.appName }}-uploads"
+        - name: uploads
           persistentVolumeClaim:
-            claimName: "{{ .Values.appName }}-pvc"
+            claimName: "{{ .Release.Name }}-pvc"

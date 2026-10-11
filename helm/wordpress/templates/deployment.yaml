@@ -37,6 +37,13 @@ spec:
         volumeMounts:
           - name: uploads
             mountPath: /var/www/html/wp-content/uploads
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
         readinessProbe:
           httpGet:
             path: /wp-login.php

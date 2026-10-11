@@ -8,12 +8,6 @@ variable "project_name_short" {
   type        = string
 }
 
-variable "region" {
-  description = "The AWS region to deploy resources in."
-  default     = "eu-west-3"
-  type        = string
-}
-
 variable "environment" {
   description = "The environment for the resources."
   type        = string
@@ -86,12 +80,14 @@ variable "eks_desired_size" {
   type        = number
 }
 
+# Autoscaling is not configured on the EKS node group, so it won't impact anything
 variable "eks_min_size" {
   description = "The minimum size for the EKS node group."
   default     = 1
   type        = number
 }
 
+# Autoscaling is not configured on the EKS node group, so it won't impact anything
 variable "eks_max_size" {
   description = "The maximum size for the EKS node group."
   default     = 3

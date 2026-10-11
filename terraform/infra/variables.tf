@@ -79,3 +79,21 @@ variable "rds_username" {
   default     = "admin"
   type        = string
 }
+
+variable "eks_desired_size" {
+  description = "The desired size for the EKS node group."
+  default     = 2
+  type        = number
+}
+
+variable "eks_min_size" {
+  description = "The minimum size for the EKS node group."
+  default     = 1
+  type        = number
+}
+
+variable "eks_max_size" {
+  description = "The maximum size for the EKS node group."
+  default     = 3
+  type        = number
+}

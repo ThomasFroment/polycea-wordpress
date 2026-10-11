@@ -28,3 +28,9 @@ output "k8s_namespace" {
   description = "The name of the Kubernetes namespace"
   value       = kubernetes_namespace_v1.this.metadata[0].name
 }
+
+output "helm_role_arn" {
+  description = "The ARN of the IAM role for Helm (GitHub Actions OIDC)"
+  sensitive   = true
+  value       = aws_iam_role.helm_oidc.arn
+}

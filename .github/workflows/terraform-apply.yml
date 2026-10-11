@@ -32,6 +32,9 @@ on:
       k8s_namespace:
         description: "Kubernetes Namespace"
         value: ${{ jobs.terraform-apply.outputs.k8s_namespace }}
+      helm_role_arn:
+        description: "Helm Role ARN"
+        value: ${{ jobs.terraform-apply.outputs.helm_role_arn }}
   workflow_dispatch:
     inputs:
       environment:
@@ -69,6 +72,7 @@ jobs:
       rds_username: ${{ steps.terraform-output.outputs.rds_username }}
       rds_password: ${{ steps.terraform-output.outputs.rds_password }}
       k8s_namespace: ${{ steps.terraform-output.outputs.k8s_namespace }}
+      helm_role_arn: ${{ steps.terraform-output.outputs.helm_role_arn }}
 
     steps:
       - uses: actions/checkout@v7
@@ -108,3 +112,4 @@ jobs:
           echo "rds_username=$(terraform output -raw rds_username)" >> $GITHUB_OUTPUT
           echo "rds_password=$(terraform output -raw rds_password)" >> $GITHUB_OUTPUT
           echo "k8s_namespace=$(terraform output -raw k8s_namespace)" >> $GITHUB_OUTPUT
+          echo "helm_role_arn=$(terraform output -raw helm_role_arn)" >> $GITHUB_OUTPUT

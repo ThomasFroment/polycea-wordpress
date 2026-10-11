@@ -38,7 +38,7 @@ jobs:
       - name: AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ needs.terraform.outputs.helm_role_arn }}
           aws-region: ${{ inputs.region }}
 
       - name: Install Helm

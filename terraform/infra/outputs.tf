@@ -23,3 +23,8 @@ output "rds_password" {
   sensitive   = true
   value       = random_password.rds.result
 }
+
+output "k8s_namespace" {
+  description = "The name of the Kubernetes namespace"
+  value       = kubernetes_namespace_v1.this.metadata[0].name
+}

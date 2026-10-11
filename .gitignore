@@ -1,11 +1,7 @@
 *.tfstate
 *.tfstate.*
 
-secrets.auto.tfvars
-
 .terraform/
 .terraform.tfstate.lock.info
-
-*.tfbackend
 
 *.env

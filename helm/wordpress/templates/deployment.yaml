@@ -33,7 +33,8 @@ spec:
                 name: "{{ .Release.Name }}-secret"
                 key: WORDPRESS_DB_PASSWORD
         ports:
-        - containerPort: {{ .Values.containerPort }}
+        - name: http
+          containerPort: {{ .Values.containerPort }}
         volumeMounts:
           - name: uploads
             mountPath: /var/www/html/wp-content/uploads

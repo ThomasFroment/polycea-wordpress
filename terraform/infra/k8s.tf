@@ -26,4 +26,7 @@ resource "kubernetes_storage_class_v1" "this" {
     fileSystemId     = aws_efs_file_system.this.id
     directoryPerms   = "700"
   }
+  depends_on = [
+    aws_eks_addon.efs_csi
+  ]
 }

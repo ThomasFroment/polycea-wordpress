@@ -97,3 +97,9 @@ variable "eks_max_size" {
   default     = 3
   type        = number
 }
+
+variable "rds_skip_final_snapshot" {
+  description = "Whether to skip the final snapshot when deleting the RDS instance."
+  default     = false
+  type        = bool
+}

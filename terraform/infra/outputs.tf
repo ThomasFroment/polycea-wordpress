@@ -15,7 +15,7 @@ output "rds_address" {
 
 output "rds_username" {
   description = "The username for the RDS database"
-  value       = var.project_name_short
+  value       = aws_db_instance.this.username
 }
 
 output "rds_password" {

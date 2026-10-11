@@ -1,9 +1,5 @@
-resource "aws_iam_openid_connect_provider" "helm_oidc" {
+data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
-
-  client_id_list = [
-    "sts.amazonaws.com",
-  ]
 }
 
 data "aws_iam_policy_document" "helm_oidc" {
@@ -12,7 +8,7 @@ data "aws_iam_policy_document" "helm_oidc" {
 
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.helm_oidc.arn]
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
     }
 
     condition {

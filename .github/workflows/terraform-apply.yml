@@ -17,9 +17,6 @@ on:
       eks_cluster_name:
         description: "EKS Cluster Name"
         value: ${{ jobs.terraform-apply.outputs.eks_cluster_name }}
-      efs_id:
-        description: "EFS ID"
-        value: ${{ jobs.terraform-apply.outputs.efs_id }}
       rds_name:
         description: "RDS Name"
         value: ${{ jobs.terraform-apply.outputs.rds_name }}
@@ -64,7 +61,6 @@ jobs:
     needs: [terraform-lint, helm-lint]
     outputs:
       eks_cluster_name: ${{ steps.terraform-output.outputs.eks_cluster_name }}
-      efs_id: ${{ steps.terraform-output.outputs.efs_id }}
       rds_name: ${{ steps.terraform-output.outputs.rds_name }}
       rds_address: ${{ steps.terraform-output.outputs.rds_address }}
       rds_username: ${{ steps.terraform-output.outputs.rds_username }}
@@ -103,7 +99,6 @@ jobs:
         working-directory: ./terraform/infra
         run: |
           echo "eks_cluster_name=$(terraform output -raw eks_cluster_name)" >> $GITHUB_OUTPUT
-          echo "efs_id=$(terraform output -raw efs_id)" >> $GITHUB_OUTPUT
           echo "rds_name=$(terraform output -raw rds_name)" >> $GITHUB_OUTPUT
           echo "rds_address=$(terraform output -raw rds_address)" >> $GITHUB_OUTPUT
           echo "rds_username=$(terraform output -raw rds_username)" >> $GITHUB_OUTPUT

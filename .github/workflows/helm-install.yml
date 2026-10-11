@@ -49,12 +49,6 @@ jobs:
         run: |
           aws eks update-kubeconfig --name ${{ needs.terraform.outputs.eks_cluster_name }} --region ${{ inputs.region }}
 
-      - name: Install storage-class Helm Chart
-        run: |
-          helm upgrade --install storage-class ./helm/storage-class \
-            --set efsFileSystemId=${{ needs.terraform.outputs.efs_id }} \
-            --wait
-            
       - name: Install wordpress Helm Chart
         env:
           DB_HOST: ${{ needs.terraform.outputs.rds_address }}

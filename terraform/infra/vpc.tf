@@ -18,18 +18,19 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_subnet" "public" {
-  count             = 2
+  count             = length(var.public_subnet_cidr_blocks)
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = var.public_subnet_cidr_blocks[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "PublicSubnet-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    Name                     = "PublicSubnet-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
 resource "aws_subnet" "private" {
-  count             = 2
+  count             = length(var.private_subnet_cidr_blocks)
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = var.private_subnet_cidr_blocks[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
@@ -40,7 +41,7 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_eip" "nat" {
-  count      = var.only_one_nat_gateway ? 1 : 2
+  count      = var.only_one_nat_gateway ? 1 : length(var.public_subnet_cidr_blocks)
   domain     = "vpc"
   depends_on = [aws_internet_gateway.igw]
 
@@ -50,7 +51,7 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "nat" {
-  count         = var.only_one_nat_gateway ? 1 : 2
+  count         = var.only_one_nat_gateway ? 1 : length(var.public_subnet_cidr_blocks)
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
   depends_on    = [aws_internet_gateway.igw]
@@ -74,7 +75,7 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table" "private" {
-  count  = 2
+  count  = length(var.private_subnet_cidr_blocks)
   vpc_id = aws_vpc.vpc.id
 
   route {
@@ -88,13 +89,13 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table_association" "public" {
-  count          = 2
+  count          = length(var.public_subnet_cidr_blocks)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
 resource "aws_route_table_association" "private" {
-  count          = 2
+  count          = length(var.private_subnet_cidr_blocks)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
 }

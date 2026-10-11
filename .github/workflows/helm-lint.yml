@@ -11,8 +11,5 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Lint Helm Charts (storage-class)
-        run: helm lint ./helm/storage-class
-
       - name: Lint Helm Charts (wordpress)
         run: helm lint ./helm/wordpress

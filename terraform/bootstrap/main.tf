@@ -20,7 +20,7 @@ provider "aws" {
   }
 }
 
-resource "aws_s3_bucket" "terraformState" {
+resource "aws_s3_bucket" "terraform_state" {
   bucket        = "${var.project_name}-terraform-tfstate-bucket"
   force_destroy = true
 
@@ -29,7 +29,7 @@ resource "aws_s3_bucket" "terraformState" {
   }
 }
 
-resource "aws_iam_openid_connect_provider" "this" {
+resource "aws_iam_openid_connect_provider" "terraform_oidc" {
   url = "https://token.actions.githubusercontent.com"
 
   client_id_list = [
@@ -37,13 +37,13 @@ resource "aws_iam_openid_connect_provider" "this" {
   ]
 }
 
-data "aws_iam_policy_document" "oidc" {
+data "aws_iam_policy_document" "terraform_oidc" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.this.arn]
+      identifiers = [aws_iam_openid_connect_provider.terraform_oidc.arn]
     }
 
     condition {
@@ -60,12 +60,12 @@ data "aws_iam_policy_document" "oidc" {
   }
 }
 
-resource "aws_iam_role" "this" {
-  name               = "github-oidc-role-${var.project_name_short}"
-  assume_role_policy = data.aws_iam_policy_document.oidc.json
+resource "aws_iam_role" "terraform_oidc" {
+  name               = "github-oidc-role-terraform-${var.project_name_short}"
+  assume_role_policy = data.aws_iam_policy_document.terraform_oidc.json
 }
 
-resource "aws_iam_role_policy_attachment" "oidc" {
-  role       = aws_iam_role.this.name
+resource "aws_iam_role_policy_attachment" "terraform_oidc" {
+  role       = aws_iam_role.terraform_oidc.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }

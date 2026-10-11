@@ -8,12 +8,6 @@ variable "project_name_short" {
   type        = string
 }
 
-variable "region" {
-  description = "The AWS region to deploy resources in."
-  default     = "eu-west-3"
-  type        = string
-}
-
 variable "environment" {
   description = "The environment for the resources."
   type        = string
@@ -22,6 +16,13 @@ variable "environment" {
 variable "vpc_cidr_block" {
   description = "The CIDR block for the VPC."
   default     = "10.1.0.0/16"
+  type        = string
+}
+
+variable "eks_admin_role_arn" {
+  description = "The ARN of the EKS admin role."
+  default     = ""
+  sensitive   = true
   type        = string
 }
 
@@ -71,4 +72,30 @@ variable "rds_username" {
   description = "The username for the RDS database (alphanumeric only)."
   default     = "admin"
   type        = string
+}
+
+variable "eks_desired_size" {
+  description = "The desired size for the EKS node group."
+  default     = 2
+  type        = number
+}
+
+# Autoscaling is not configured on the EKS node group, so it won't impact anything
+variable "eks_min_size" {
+  description = "The minimum size for the EKS node group."
+  default     = 1
+  type        = number
+}
+
+# Autoscaling is not configured on the EKS node group, so it won't impact anything
+variable "eks_max_size" {
+  description = "The maximum size for the EKS node group."
+  default     = 3
+  type        = number
+}
+
+variable "rds_skip_final_snapshot" {
+  description = "Whether to skip the final snapshot when deleting the RDS instance."
+  default     = false
+  type        = bool
 }

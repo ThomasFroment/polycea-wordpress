@@ -31,6 +31,8 @@ resource "kubernetes_storage_class_v1" "this" {
     provisioningMode = "efs-ap"
     fileSystemId     = aws_efs_file_system.this.id
     directoryPerms   = "700"
+    uid              = "1001"
+    gid              = "1001"
   }
 
   depends_on = [

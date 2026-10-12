@@ -1,3 +1,27 @@
+> [!IMPORTANT]
+> La documentation est en cours de rédaction et peut être amenée à changer
+
+# Structure
+
+```bash
+└── polycea-wordpress/
+    ├── .github/
+    │   └── workflows/         # Pipelines CI/CD (Terraform apply, Helm install, lint)
+    ├── helm/
+    │   └── wordpress/         # Chart Helm wordpress (Deployments, Services, PVC)
+    │       ├── templates/
+    │       ├── Chart.yaml
+    │       └── values.yaml
+    └── terraform/
+        ├── bootstrap/         # Infrastructure bootstrap (S3, OIDC pour GitHub Actions)
+        │   └── env/           # Fichier .tfvars commun pour les environnements
+        └── infra/             # Infrastructure coeur (VPC, EKS, RDS, EFS, K8S, SG)
+            └── env/           # Fichiers .tfvars par environnement (`dev`, `prod`)
+```
+
+> [!NOTE]
+> Par souci de simplicité, la StorageClass, le namespace et les secrets k8s sont gérés dans la stack `infra`. Toutefois ce couplage peut créer des problèmes de dépendance, notamment des blocages lors du destroy.
+
 # Stack technique
 
 - **Cloud Provider :** AWS
@@ -36,7 +60,7 @@ Le cluster Kubernetes est managé par AWS EKS, les worker nodes sont déployés 
 ## Stockage
 
 - **AWS RDS (MySQL)** : Déployé dans les sous-réseaux privés
-- **AWS EFS** : Système de fichiers partagé distribué sur les deux AZ. Il permet le partage des fichiers WordPress (`wp-content`) entre les multiples réplicas de pods (`ReadWriteMany`).
+- **AWS EFS** : Système de fichiers partagé distribué sur les deux AZ. Il permet le partage des fichiers WordPress (`wp-content`) entre les multiples réplicas de pods (`ReadWriteMany` / `RWX`).
 
 Les security group d'EFS (port 2049) et de RDS (port 3306) n'acceptent de connexions que depuis le Security Group du cluster EKS.
 
@@ -44,6 +68,6 @@ Les security group d'EFS (port 2049) et de RDS (port 3306) n'acceptent de connex
 > Pour des raisons de coût, dans l'environnement `dev`, la BDD RDS n'utilise pas le mode `multi-az` (qui fournit de la haute disponibilité en `prod`).
 
 > [!WARNING]
-> RDS et EFS acceptent les connexions entrantes depuis un security group qui est partagé à la fois par les worker nodes **et** le control plane EKS.
+> RDS et EFS acceptent les connexions entrantes depuis un Security Group qui est partagé à la fois par les worker nodes **et** le control plane EKS.
 
 

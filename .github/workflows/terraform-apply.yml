@@ -23,12 +23,6 @@ on:
       rds_address:
         description: "RDS Address"
         value: ${{ jobs.terraform-apply.outputs.rds_address }}
-      rds_username:
-        description: "RDS Username"
-        value: ${{ jobs.terraform-apply.outputs.rds_username }}
-      rds_password:
-        description: "RDS Password"
-        value: ${{ jobs.terraform-apply.outputs.rds_password }}
       k8s_namespace:
         description: "Kubernetes Namespace"
         value: ${{ jobs.terraform-apply.outputs.k8s_namespace }}
@@ -69,8 +63,6 @@ jobs:
       eks_cluster_name: ${{ steps.terraform-output.outputs.eks_cluster_name }}
       rds_name: ${{ steps.terraform-output.outputs.rds_name }}
       rds_address: ${{ steps.terraform-output.outputs.rds_address }}
-      rds_username: ${{ steps.terraform-output.outputs.rds_username }}
-      rds_password: ${{ steps.terraform-output.outputs.rds_password }}
       k8s_namespace: ${{ steps.terraform-output.outputs.k8s_namespace }}
       helm_role_arn: ${{ steps.terraform-output.outputs.helm_role_arn }}
 
@@ -109,7 +101,5 @@ jobs:
           echo "eks_cluster_name=$(terraform output -raw eks_cluster_name)" >> $GITHUB_OUTPUT
           echo "rds_name=$(terraform output -raw rds_name)" >> $GITHUB_OUTPUT
           echo "rds_address=$(terraform output -raw rds_address)" >> $GITHUB_OUTPUT
-          echo "rds_username=$(terraform output -raw rds_username)" >> $GITHUB_OUTPUT
-          echo "rds_password=$(terraform output -raw rds_password)" >> $GITHUB_OUTPUT
           echo "k8s_namespace=$(terraform output -raw k8s_namespace)" >> $GITHUB_OUTPUT
           echo "helm_role_arn=$(terraform output -raw helm_role_arn)" >> $GITHUB_OUTPUT

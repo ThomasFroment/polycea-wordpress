@@ -40,3 +40,15 @@ resource "kubernetes_storage_class_v1" "this" {
     aws_eks_addon.efs_csi
   ]
 }
+
+resource "kubernetes_secret_v1" "rds" {
+  metadata {
+    name      = "rds-credentials"
+    namespace = kubernetes_namespace_v1.this.metadata[0].name
+  }
+
+  data = {
+    username = aws_db_instance.this.username
+    password = aws_db_instance.this.password
+  }
+}

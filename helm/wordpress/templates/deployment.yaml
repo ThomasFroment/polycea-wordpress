@@ -23,15 +23,18 @@ spec:
         env:
           - name: WORDPRESS_DB_HOST
             value: {{ .Values.db.host }}
-          - name: WORDPRESS_DB_USER
-            value: {{ .Values.db.user }}
           - name: WORDPRESS_DB_NAME
             value: {{ .Values.db.name }}
+          - name: WORDPRESS_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: rds-credentials
+                key: username
           - name: WORDPRESS_DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: "{{ .Release.Name }}-secret"
-                key: WORDPRESS_DB_PASSWORD
+                name: rds-credentials
+                key: password
         ports:
         - name: http
           containerPort: {{ .Values.containerPort }}

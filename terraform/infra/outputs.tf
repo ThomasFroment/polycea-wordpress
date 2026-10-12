@@ -13,17 +13,6 @@ output "rds_address" {
   value       = aws_db_instance.this.address
 }
 
-output "rds_username" {
-  description = "The username for the RDS database"
-  value       = aws_db_instance.this.username
-}
-
-output "rds_password" {
-  description = "The password for the RDS database"
-  sensitive   = true
-  value       = random_password.rds.result
-}
-
 output "k8s_namespace" {
   description = "The name of the Kubernetes namespace"
   value       = kubernetes_namespace_v1.this.metadata[0].name

@@ -51,4 +51,10 @@ resource "kubernetes_secret_v1" "rds" {
     username = aws_db_instance.this.username
     password = aws_db_instance.this.password
   }
+
+  depends_on = [
+    aws_eks_cluster.this,
+    aws_eks_access_entry.this,
+    aws_eks_access_policy_association.this,
+  ]
 }

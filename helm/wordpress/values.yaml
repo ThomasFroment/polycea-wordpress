@@ -5,7 +5,7 @@ image:
   digest: 845d250ecd73f5e9b8ab2c42ab8b32407992456bab4dcb79547f2c0b7d25959b
 
 containerPort: 8080
-mountPath: /opt/bitnami/wordpress/wp-content/uploads
+mountPath: /bitnami/wordpress/
 
 service:
   type: LoadBalancer

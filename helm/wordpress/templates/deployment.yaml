@@ -35,6 +35,18 @@ spec:
               secretKeyRef:
                 name: rds-credentials
                 key: password
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - NET_BIND_SERVICE
+              - CHOWN
+              - FOWNER
+              - DAC_OVERRIDE
+              - SETUID
+              - SETGID
         ports:
         - name: http
           containerPort: {{ .Values.containerPort }}

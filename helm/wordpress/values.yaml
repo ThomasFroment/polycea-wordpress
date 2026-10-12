@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: bitnami/wordpress
-  tag: sha256-24b0c4379a8f54c1f0d6f87432c2bedc6cbfb77b92a7315b152b2434d0105968
+  digest: 845d250ecd73f5e9b8ab2c42ab8b32407992456bab4dcb79547f2c0b7d25959b
 
 containerPort: 8080
 mountPath: /opt/bitnami/wordpress/wp-content/uploads
@@ -13,8 +13,8 @@ service:
 
 securityContext:
   runAsUser: 1001
-  runAsGroup: 1001
-  fsGroup: 1001
+  runAsGroup: 0
+  fsGroup: 0
 
 db:
   host: ""

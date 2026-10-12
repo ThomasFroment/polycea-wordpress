@@ -17,34 +17,53 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}@sha256:{{ .Values.image.digest }}"
         env:
-          - name: WORDPRESS_DB_HOST
+          - name: WORDPRESS_DATABASE_HOST
             value: {{ .Values.db.host }}
-          - name: WORDPRESS_DB_USER
-            value: {{ .Values.db.user }}
-          - name: WORDPRESS_DB_NAME
+          - name: WORDPRESS_DATABASE_NAME
             value: {{ .Values.db.name }}
-          - name: WORDPRESS_DB_PASSWORD
+          - name: WORDPRESS_DATABASE_USER
             valueFrom:
               secretKeyRef:
-                name: "{{ .Release.Name }}-secret"
-                key: WORDPRESS_DB_PASSWORD
+                name: rds-credentials
+                key: username
+          - name: WORDPRESS_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: rds-credentials
+                key: password
+          # This is a dummy value. This should not be used in production.
+          - name: WORDPRESS_PASSWORD
+            value: "admin"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         ports:
         - name: http
           containerPort: {{ .Values.containerPort }}
         volumeMounts:
           - name: uploads
-            mountPath: /var/www/html/wp-content/uploads
+            mountPath: {{ .Values.mountPath }}
         resources:
           requests:
             cpu: "100m"
-            memory: "128Mi"
+            memory: "256Mi"
           limits:
             cpu: "500m"
-            memory: "256Mi"
+            memory: "512Mi"
         readinessProbe:
           httpGet:
             path: /wp-login.php

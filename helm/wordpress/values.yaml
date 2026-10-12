@@ -1,14 +1,20 @@
 replicaCount: 2
 
 image:
-  repository: wordpress
-  tag: 7.1.2-apache
+  repository: bitnami/wordpress
+  digest: 845d250ecd73f5e9b8ab2c42ab8b32407992456bab4dcb79547f2c0b7d25959b
 
-containerPort: 80
+containerPort: 8080
+mountPath: /bitnami/wordpress/
 
 service:
   type: LoadBalancer
   port: 80
+
+securityContext:
+  runAsUser: 1001
+  runAsGroup: 0
+  fsGroup: 0
 
 db:
   host: ""

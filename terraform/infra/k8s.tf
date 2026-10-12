@@ -31,6 +31,8 @@ resource "kubernetes_storage_class_v1" "this" {
     provisioningMode = "efs-ap"
     fileSystemId     = aws_efs_file_system.this.id
     directoryPerms   = "700"
+    uid              = "1001"
+    gid              = "1001"
   }
 
   depends_on = [
@@ -38,5 +40,23 @@ resource "kubernetes_storage_class_v1" "this" {
     aws_eks_access_entry.this,
     aws_eks_access_policy_association.this,
     aws_eks_addon.efs_csi
+  ]
+}
+
+resource "kubernetes_secret_v1" "rds" {
+  metadata {
+    name      = "rds-credentials"
+    namespace = kubernetes_namespace_v1.this.metadata[0].name
+  }
+
+  data = {
+    username = aws_db_instance.this.username
+    password = aws_db_instance.this.password
+  }
+
+  depends_on = [
+    aws_eks_cluster.this,
+    aws_eks_access_entry.this,
+    aws_eks_access_policy_association.this,
   ]
 }

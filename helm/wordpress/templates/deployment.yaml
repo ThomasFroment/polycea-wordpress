@@ -52,7 +52,7 @@ spec:
           containerPort: {{ .Values.containerPort }}
         volumeMounts:
           - name: uploads
-            mountPath: /var/www/html/wp-content/uploads
+            mountPath: {{ .Values.mountPath }}
         resources:
           requests:
             cpu: "100m"

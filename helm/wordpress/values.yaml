@@ -5,6 +5,7 @@ image:
   tag: 7.1.2-apache
 
 containerPort: 80
+mountPath: /opt/bitnami/wordpress/wp-content/uploads
 
 service:
   type: LoadBalancer

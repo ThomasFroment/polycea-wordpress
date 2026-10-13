@@ -38,15 +38,19 @@ Ci-dessous une description de l'architecture globale du projet. Beaucoup de vale
 ## Réseau
 
 Le réseau repose sur 1 VPC réparti sur 2 zones de disponibilité (AZ) sur la région `eu-west-3` :
-- **2 sous-réseaux publics** : disposent d'une route vers l'Internet Gateway. Ils accueillent les NAT Gateways + Elastic IP. Kubernetes y déploie automatiquement les Load Balancers (CLB par défaut).
+
+- **2 sous-réseaux publics** : disposent d'une route vers l'Internet Gateway. Ils accueillent les NAT Gateways + Elastic IP. Kubernetes y déploie automatiquement les Load Balancers.
 - **2 sous-réseaux privés** : hébergent les worker nodes ainsi que la base RDS et les points de montage NFS (EFS). Les sous-réseaux privés disposent d'une route vers une NAT Gateway pour les flux sortants.
 
 > [!NOTE]
-> Pour des raisons de coût, dans l'environnement `dev`, l'infrastructure ne provisionne qu'une seule NAT Gateway pour tous les sous-réseaux privés.
+> Dans un environment `prod-ready` on aurait privilégier une architecture 3-tiers comme le recommande la documentation AWS. Avec deux sous-réseaux `isolated` sans route vers Internet pour les BDD RDS et les points de montage EFS.
 
 ## EKS
 
-Le cluster Kubernetes est managé par AWS EKS, les worker nodes sont déployés dans les sous-réseaux privés.
+Le cluster Kubernetes est managé par AWS EKS, on délègue à AWS la responsabilité des mises à jour, backups `etcd`, patch de sécurité et la haute disponibilité (EKS est multi-az).
+Les worker nodes sont déployé sur les sous-réseaux privés (distribué entre eux).
+
+EKS déploie automatiquement les Loads Balancer pour les services K8S (si `type: LoadBalancer`), par défaut il s'agit de CLB (Classic Load Balancer) et EKS identifie les sous-réseaux valides à travers un tag.
 
 > [!NOTE]
 > Aucun mécanisme d'autoscaling (e.g. Karpenter) n'étant installé sur le cluster, les valeurs `min` et `max` ne déclenchent aucun redimensionnement automatique.
@@ -62,12 +66,26 @@ Le cluster Kubernetes est managé par AWS EKS, les worker nodes sont déployés 
 - **AWS RDS (MySQL)** : Déployé dans les sous-réseaux privés
 - **AWS EFS** : Système de fichiers partagé distribué sur les deux AZ. Il permet le partage des fichiers WordPress (`wp-content`) entre les multiples réplicas de pods (`ReadWriteMany` / `RWX`).
 
-Les security group d'EFS (port 2049) et de RDS (port 3306) n'acceptent de connexions que depuis le Security Group du cluster EKS.
+> [!WARNING]
+> RDS (port 3306) et EFS (port 2049) acceptent les connexions entrantes depuis un Security Group qui est partagé à la fois par les worker nodes **et** le control plane EKS.
 
-> [!NOTE]
-> Pour des raisons de coût, dans l'environnement `dev`, la BDD RDS n'utilise pas le mode `multi-az` (qui fournit de la haute disponibilité en `prod`).
+# Environments
+
+Le projet fonctionne autour de deux environnements : `dev` et `prod`. L'objectif est de réduire les coûts et le temps de déploiement en développement.
+
+- **NAT Gateway** : 1 seule NAT Gateway en `dev` pour tous les sous-réseaux privés (contre 1 par AZ en `prod` pour la haute disponibilité).
+- **RDS** : Déployé en Single-AZ en `dev` et `skip_final_snapshot: true` (réduit le temp nécessaire à la destruction)
+
+Actuellement, la séparation repose sur :
+
+- **AWS** : Un compte unique, différenciation par tags.
+- **Terraform** : Deux workspaces pour séparer les `.tfstate`, avec des fichiers `.tfvars` distincts.
+- **CI/CD** : Un choix d'environnement au lancement du workflow.
 
 > [!WARNING]
-> RDS et EFS acceptent les connexions entrantes depuis un Security Group qui est partagé à la fois par les worker nodes **et** le control plane EKS.
+> Cette séparation n'est pas `prod-ready` :
+> - **Compte unique** : Pas de frontière de sécurité étanche entre `dev` et `prod`. En `prod-ready`, on utiliserait des comptes AWS dédiés via AWS Organizations.
+> - **Workspaces Terraform** : Déconseillés par HashiCorp pour isoler des environnements. On préférerait des répertoires/modules dédiés avec des backends S3 distincts.
+> - **CI/CD** : On aurait pu avoir deux repos distincts.
 
 

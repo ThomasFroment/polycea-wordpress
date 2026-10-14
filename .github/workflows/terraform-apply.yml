@@ -53,12 +53,9 @@ jobs:
   terraform-lint:
     uses: ./.github/workflows/terraform-lint.yml
 
-  helm-lint:
-    uses: ./.github/workflows/helm-lint.yml
-
   terraform-apply:
     runs-on: ubuntu-latest
-    needs: [terraform-lint, helm-lint]
+    needs: [terraform-lint]
     outputs:
       eks_cluster_name: ${{ steps.terraform-output.outputs.eks_cluster_name }}
       rds_name: ${{ steps.terraform-output.outputs.rds_name }}

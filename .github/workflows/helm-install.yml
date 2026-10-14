@@ -22,6 +22,9 @@ permissions:
   contents: read
 
 jobs:
+  helm-lint:
+    uses: ./.github/workflows/helm-lint.yml
+
   terraform:
     uses: ./.github/workflows/terraform-apply.yml
     with:
@@ -30,7 +33,7 @@ jobs:
     secrets: inherit
 
   helm-install:
-    needs: terraform
+    needs: [helm-lint, terraform]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

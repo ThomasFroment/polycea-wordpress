@@ -98,8 +98,8 @@ L'application WordPress est packagée sous forme d'un chart Helm personnalisé :
 L'authentification auprès d'AWS s'effectue via une fédération d'identité OIDC (OpenID Connect) entre GitHub et AWS IAM. 
 Deux rôles AWS sont utilisés pour ce pipeline :
 
-- `github-oidc-role-terraform-polycea-wp-${env}` : Provisionné par la stack `bootstrap`. Il accorde à Terraform la policy `AdministratorAccess` sur le compte AWS.
-- `github-oidc-role-helm-polycea-wp-${env}` : Provisionné par la stack `infra`. Il accorde au workflow Helm l'action AWS `eks:DescribeCluster` et associe l'access entry EKS `AmazonEKSEditPolicy` restreinte au namespace polycea-wordpress.
+- `github-oidc-role-terraform-polycea-wp` : Provisionné par la stack `bootstrap`. Il accorde à Terraform la policy `AdministratorAccess` sur le compte AWS.
+- `github-oidc-role-helm-polycea-wp-${env}` : Provisionné par la stack `infra`. Il accorde au workflow Helm l'action AWS `eks:DescribeCluster` et associe l'access entry EKS `AmazonEKSEditPolicy` restreinte au namespace `polycea-wordpress`.
 
 La chaîne se compose de 4 pipelines :
 
@@ -108,14 +108,11 @@ La chaîne se compose de 4 pipelines :
 - `helm-lint.yml` : Validation syntaxique du chart (`helm lint`) à chaque PR ou push.
 - `helm-install.yml` : Déploiement de la release Helm sur le cluster EKS cible.
 
-> [!NOTE]
-> Le déploiement applicatif (`helm-install.yml`) nécessite une infrastructure à jour (`terraform-apply.yml`), elle-même conditionnée par le succès des étapes de linting (`terraform-lint.yml` et `helm-lint.yml`).
-
 > [!WARNING]
 > Ce pipeline n'est pas `prod-ready` sur plusieurs points :
-> - **Permissions IAM trop permissives** : Le rôle OIDC GitHub Actions utilise la politique managée `AdministratorAccess`. En production, les permissions devraient être restreintes selon le principe du moindre privilège aux seules ressources du projet.
-> - **Absence de scan de sécurité** : Aucun scan de vulnérabilités statique (Trivy sur le chart/image, Checkov/Tfsec sur le code Terraform) n'est exécuté avant le déploiement.
-> - **Gestion des environnements** : Le déclenchement manuel via `workflow_dispatch` sur un dépôt unique présente des risques d'erreur humaine. Une approche GitOps (ex. ArgoCD) ou une promotion par branches/dépôts distincts avec approbations manuelles serait privilégiée.
+> - **Permissions IAM trop permissives** : Le rôle OIDC GitHub Actions utilise la politique `AdministratorAccess`. En production, les permissions devraient être restreintes selon le principe du moindre privilège aux seules ressources du projet.
+> - **Absence de scan de sécurité**
+> - **Gestion des environnements** : Le déclenchement manuel via `workflow_dispatch` sur un dépôt unique présente des risques d'erreur humaine. Une approche GitOps (e.g. ArgoCD) avec des branches ou des dépôts distincts serait préférable.
 
 # Environnements
 

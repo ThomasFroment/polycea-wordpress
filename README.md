@@ -43,14 +43,14 @@ Le réseau repose sur 1 VPC réparti sur 2 zones de disponibilité (AZ) sur la r
 - **2 sous-réseaux privés** : hébergent les worker nodes ainsi que la base RDS et les points de montage NFS (EFS). Les sous-réseaux privés disposent d'une route vers une NAT Gateway pour les flux sortants.
 
 > [!NOTE]
-> Dans un environment `prod-ready` on aurait privilégier une architecture 3-tiers comme le recommande la documentation AWS. Avec deux sous-réseaux `isolated` sans route vers Internet pour les BDD RDS et les points de montage EFS.
+> Dans un environment `prod-ready` on aurait privilégié une architecture 3-tiers comme le recommande la documentation AWS. Avec deux sous-réseaux `isolated` sans route vers Internet pour les BDD RDS et les points de montage EFS.
 
 ## EKS
 
 Le cluster Kubernetes est managé par AWS EKS, on délègue à AWS la responsabilité des mises à jour, backups `etcd`, patch de sécurité et la haute disponibilité (EKS est multi-az).
-Les worker nodes sont déployé sur les sous-réseaux privés (distribué entre eux).
+Les worker nodes sont déployés sur les sous-réseaux privés (distribué entre eux).
 
-EKS déploie automatiquement les Loads Balancer pour les services K8S (si `type: LoadBalancer`), par défaut il s'agit de CLB (Classic Load Balancer) et EKS identifie les sous-réseaux valides à travers un tag.
+EKS déploie automatiquement les Load Balancers pour les services K8S (si `type: LoadBalancer`), par défaut il s'agit de CLB (Classic Load Balancer) et EKS identifie les sous-réseaux valides à travers un tag.
 
 > [!NOTE]
 > Aucun mécanisme d'autoscaling (e.g. Karpenter) n'étant installé sur le cluster, les valeurs `min` et `max` ne déclenchent aucun redimensionnement automatique.
@@ -69,12 +69,60 @@ EKS déploie automatiquement les Loads Balancer pour les services K8S (si `type:
 > [!WARNING]
 > RDS (port 3306) et EFS (port 2049) acceptent les connexions entrantes depuis un Security Group qui est partagé à la fois par les worker nodes **et** le control plane EKS.
 
-# Environments
+# Helm
+
+L'application WordPress est packagée sous forme d'un chart Helm personnalisé :
+
+- **Image** : Utilisation de l'image `bitnami/wordpress` épinglée par digest SHA256.
+- **Contexte de sécurité** :
+  - Exécution en non-root (`runAsNonRoot: true`, UID `1001`).
+  - Blocage de l'élévation de privilèges (`allowPrivilegeEscalation: false`).
+  - Suppression de toutes les capacités Linux (`drop: - ALL`).
+  - Profil Seccomp du runtime (`RuntimeDefault`).
+- **Probes** :
+  - **Readiness Probe** : Requête HTTP sur `/wp-login.php` pour s'assurer que le pod est prêt à recevoir du trafic.
+  - **Liveness Probe** : Requête HTTP sur `/license.txt` (fichier statique léger) pour tester l'état du pod.
+- **Ressources** : Définition de `requests` (100m CPU / 256Mi RAM) et `limits` (500m CPU / 512Mi RAM).
+- **Persistance** : Le volume monté sur `/bitnami/wordpress/` est adossé à un PVC réclamant la `StorageClass` EFS (`efs-sc`) en mode `ReadWriteMany`, assurant le partage des fichiers (wp-content, plugins, thèmes) entre les réplicas.
+
+> [!NOTE]
+> L'image `bitnami/wordpress` a été préférée à l'image officielle car elle tourne nativement en non-root et tolère la suppression complète des capacités Linux.
+
+> [!WARNING]
+> Le chart Helm n'est pas `prod-ready` sur plusieurs aspects :
+> - **Absence de `podAntiAffinity`** : Rien n'empêche le scheduler de planifier tous les réplicas sur le même worker node, créant un SPOF.
+> - **Gestion des secrets** : Les identifiants MySQL sont générés et stockés dans un `Secret` Kubernetes (base64 dans etcd) via le provider Terraform. En environnement `prod-ready`, on utiliserait un Secrets Manager.
+
+# CI/CD
+
+L'authentification auprès d'AWS s'effectue via une fédération d'identité OIDC (OpenID Connect) entre GitHub et AWS IAM. 
+Deux rôles AWS sont utilisés pour ce pipeline :
+
+- `github-oidc-role-terraform-polycea-wp-${env}` : Provisionné par la stack `bootstrap`. Il accorde à Terraform la policy `AdministratorAccess` sur le compte AWS.
+- `github-oidc-role-helm-polycea-wp-${env}` : Provisionné par la stack `infra`. Il accorde au workflow Helm l'action AWS `eks:DescribeCluster` et associe l'access entry EKS `AmazonEKSEditPolicy` restreinte au namespace polycea-wordpress.
+
+La chaîne se compose de 4 pipelines :
+
+- `terraform-lint.yml` : Linting et vérification de formatage à chaque PR ou push.
+- `terraform-apply.yml` : Déploiement de l'infrastructure via `workflow_dispatch` avec sélection manuelle de l'environnement.
+- `helm-lint.yml` : Validation syntaxique du chart (`helm lint`) à chaque PR ou push.
+- `helm-install.yml` : Déploiement de la release Helm sur le cluster EKS cible.
+
+> [!NOTE]
+> Le déploiement applicatif (`helm-install.yml`) nécessite une infrastructure à jour (`terraform-apply.yml`), elle-même conditionnée par le succès des étapes de linting (`terraform-lint.yml` et `helm-lint.yml`).
+
+> [!WARNING]
+> Ce pipeline n'est pas `prod-ready` sur plusieurs points :
+> - **Permissions IAM trop permissives** : Le rôle OIDC GitHub Actions utilise la politique managée `AdministratorAccess`. En production, les permissions devraient être restreintes selon le principe du moindre privilège aux seules ressources du projet.
+> - **Absence de scan de sécurité** : Aucun scan de vulnérabilités statique (Trivy sur le chart/image, Checkov/Tfsec sur le code Terraform) n'est exécuté avant le déploiement.
+> - **Gestion des environnements** : Le déclenchement manuel via `workflow_dispatch` sur un dépôt unique présente des risques d'erreur humaine. Une approche GitOps (ex. ArgoCD) ou une promotion par branches/dépôts distincts avec approbations manuelles serait privilégiée.
+
+# Environnements
 
 Le projet fonctionne autour de deux environnements : `dev` et `prod`. L'objectif est de réduire les coûts et le temps de déploiement en développement.
 
 - **NAT Gateway** : 1 seule NAT Gateway en `dev` pour tous les sous-réseaux privés (contre 1 par AZ en `prod` pour la haute disponibilité).
-- **RDS** : Déployé en Single-AZ en `dev` et `skip_final_snapshot: true` (réduit le temp nécessaire à la destruction)
+- **RDS** : Déployé en Single-AZ en `dev` et `skip_final_snapshot: true` (réduit le temps nécessaire à la destruction)
 
 Actuellement, la séparation repose sur :
 
@@ -87,5 +135,3 @@ Actuellement, la séparation repose sur :
 > - **Compte unique** : Pas de frontière de sécurité étanche entre `dev` et `prod`. En `prod-ready`, on utiliserait des comptes AWS dédiés via AWS Organizations.
 > - **Workspaces Terraform** : Déconseillés par HashiCorp pour isoler des environnements. On préférerait des répertoires/modules dédiés avec des backends S3 distincts.
 > - **CI/CD** : On aurait pu avoir deux repos distincts.
-
-

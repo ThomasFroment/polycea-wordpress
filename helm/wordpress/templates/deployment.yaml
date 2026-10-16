@@ -24,7 +24,14 @@ spec:
         fsGroup: {{ .Values.securityContext.fsGroup }}
         seccompProfile:
           type: RuntimeDefault
-
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector: 
+              matchLabels:
+                app: {{ .Chart.Name }}
+                release: {{ .Release.Name }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}@sha256:{{ .Values.image.digest }}"

@@ -22,15 +22,51 @@ permissions:
   contents: read
 
 jobs:
-  terraform:
-    uses: ./.github/workflows/terraform-apply.yml
-    with:
-      environment: ${{ inputs.environment }}
-      region: ${{ inputs.region }}
-    secrets: inherit
+  helm-lint:
+    uses: ./.github/workflows/helm-lint.yml
 
+  terraform-output:
+    runs-on: ubuntu-latest
+    outputs:
+      eks_cluster_name: ${{ steps.terraform-output.outputs.eks_cluster_name }}
+      rds_name: ${{ steps.terraform-output.outputs.rds_name }}
+      rds_address: ${{ steps.terraform-output.outputs.rds_address }}
+      k8s_namespace: ${{ steps.terraform-output.outputs.k8s_namespace }}
+      helm_role_arn: ${{ steps.terraform-output.outputs.helm_role_arn }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ inputs.region }}
+
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Terraform Init
+        working-directory: ./terraform/infra
+        run: terraform init
+
+      - name: Terraform Workspace Select
+        working-directory: ./terraform/infra
+        run: |
+          terraform workspace select ${{ inputs.environment }}
+
+      - name: Terraform Output
+        id: terraform-output
+        working-directory: ./terraform/infra
+        run: |
+          echo "eks_cluster_name=$(terraform output -raw eks_cluster_name)" >> $GITHUB_OUTPUT
+          echo "rds_name=$(terraform output -raw rds_name)" >> $GITHUB_OUTPUT
+          echo "rds_address=$(terraform output -raw rds_address)" >> $GITHUB_OUTPUT
+          echo "k8s_namespace=$(terraform output -raw k8s_namespace)" >> $GITHUB_OUTPUT
+          echo "helm_role_arn=$(terraform output -raw helm_role_arn)" >> $GITHUB_OUTPUT
+  
   helm-install:
-    needs: terraform
+    needs: [helm-lint, terraform-output]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -38,7 +74,7 @@ jobs:
       - name: AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ needs.terraform.outputs.helm_role_arn }}
+          role-to-assume: ${{ needs.terraform-output.outputs.helm_role_arn }}
           aws-region: ${{ inputs.region }}
 
       - name: Install Helm
@@ -47,13 +83,13 @@ jobs:
 
       - name: Configure kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ needs.terraform.outputs.eks_cluster_name }} --region ${{ inputs.region }}
+          aws eks update-kubeconfig --name ${{ needs.terraform-output.outputs.eks_cluster_name }} --region ${{ inputs.region }}
 
       - name: Install wordpress Helm Chart
         env:
-          DB_HOST: ${{ needs.terraform.outputs.rds_address }}
-          DB_NAME: ${{ needs.terraform.outputs.rds_name }}
-          K8S_NAMESPACE: ${{ needs.terraform.outputs.k8s_namespace }}
+          DB_HOST: ${{ needs.terraform-output.outputs.rds_address }}
+          DB_NAME: ${{ needs.terraform-output.outputs.rds_name }}
+          K8S_NAMESPACE: ${{ needs.terraform-output.outputs.k8s_namespace }}
         run: |
           helm upgrade --install wordpress ./helm/wordpress \
             --set db.host="$DB_HOST" \

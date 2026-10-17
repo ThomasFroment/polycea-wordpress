@@ -89,9 +89,7 @@ L'application WordPress est packagée sous forme d'un chart Helm personnalisé :
 > L'image `bitnami/wordpress` a été préférée à l'image officielle car elle tourne nativement en non-root et tolère la suppression complète des capacités Linux.
 
 > [!WARNING]
-> Le chart Helm n'est pas `prod-ready` sur plusieurs aspects :
-> - **Absence de `podAntiAffinity`** : Rien n'empêche le scheduler de planifier tous les réplicas sur le même worker node, créant un SPOF.
-> - **Gestion des secrets** : Les identifiants MySQL sont générés et stockés dans un `Secret` Kubernetes (base64 dans etcd) via le provider Terraform. En environnement `prod-ready`, on utiliserait un Secrets Manager.
+> Le chart Helm n'est pas `prod-ready`, les identifiants MySQL sont générés et stockés dans un `Secret` Kubernetes via le provider Terraform. En environnement `prod-ready`, on utiliserait un Secrets Manager.
 
 # CI/CD
 
@@ -99,7 +97,7 @@ L'authentification auprès d'AWS s'effectue via une fédération d'identité OID
 Deux rôles AWS sont utilisés pour ce pipeline :
 
 - `github-oidc-role-terraform-polycea-wp` : Provisionné par la stack `bootstrap`. Il accorde à Terraform la policy `AdministratorAccess` sur le compte AWS.
-- `github-oidc-role-helm-polycea-wp-${env}` : Provisionné par la stack `infra`. Il accorde au workflow Helm l'action AWS `eks:DescribeCluster` et associe l'access entry EKS `AmazonEKSEditPolicy` restreinte au namespace `polycea-wordpress`.
+- `github-oidc-role-helm-polycea-wp-${var.project_name_short}` : Provisionné par la stack `infra`. Il accorde au workflow Helm l'action AWS `eks:DescribeCluster` et associe l'access entry EKS `AmazonEKSEditPolicy` restreinte au namespace `polycea-wordpress`.
 
 La chaîne se compose de 4 pipelines :
 

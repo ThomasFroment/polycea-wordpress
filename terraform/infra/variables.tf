@@ -80,20 +80,6 @@ variable "eks_desired_size" {
   type        = number
 }
 
-# Autoscaling is not configured on the EKS node group, so it won't impact anything
-variable "eks_min_size" {
-  description = "The minimum size for the EKS node group."
-  default     = 1
-  type        = number
-}
-
-# Autoscaling is not configured on the EKS node group, so it won't impact anything
-variable "eks_max_size" {
-  description = "The maximum size for the EKS node group."
-  default     = 3
-  type        = number
-}
-
 variable "rds_skip_final_snapshot" {
   description = "Whether to skip the final snapshot when deleting the RDS instance."
   default     = false

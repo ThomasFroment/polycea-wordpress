@@ -85,3 +85,9 @@ variable "rds_skip_final_snapshot" {
   default     = false
   type        = bool
 }
+
+variable "aws_region" {
+  description = "The AWS region to deploy resources in."
+  default     = "eu-west-3"
+  type        = string
+}

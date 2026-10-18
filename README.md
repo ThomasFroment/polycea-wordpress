@@ -132,3 +132,56 @@ Actuellement, la séparation repose sur :
 > - **Compte unique** : Pas de frontière de sécurité étanche entre `dev` et `prod`. En `prod-ready`, on utiliserait des comptes AWS dédiés via AWS Organizations.
 > - **Workspaces Terraform** : Déconseillés par HashiCorp pour isoler des environnements. On préférerait des répertoires/modules dédiés avec des backends S3 distincts.
 > - **CI/CD** : On aurait pu avoir deux repos distincts.
+
+# Déploiement
+
+### Prérequis
+
+- Terraform `>= 1.16.0`
+- Helm `>= 4.3`
+- AWS CLI
+- `kubectl`
+
+### 1. Bootstrap
+
+Initialise le bucket S3 pour le state distant (et locking) et le fournisseur OIDC GitHub Actions.
+
+```bash
+cd terraform/bootstrap
+terraform init
+terraform apply -var-file=./env/bootstrap.tfvars
+```
+
+### 2. Infrastructure
+
+Déploiement de l'infrastructure coeur via les workspaces Terraform (`dev` ou `prod`).
+
+```bash
+cd ../infra
+terraform init
+terraform workspace select dev || terraform workspace new dev
+terraform apply -var-file=./env/dev.tfvars
+```
+
+### 3. Application WordPress
+
+Une fois l'infrastructure déployée :
+
+```bash
+aws eks update-kubeconfig --name $(terraform output -raw eks_cluster_name) --region eu-west-3
+
+helm upgrade --install wordpress ./helm/wordpress \
+  --set db.host="$(terraform output -raw rds_address)" \
+  --set db.name="$(terraform output -raw rds_name)" \
+  --namespace "$(terraform output -raw k8s_namespace)" \
+  --wait
+```
+
+### 4. Destruction
+
+Pour détruire l'infrastructure :
+
+```bash
+helm uninstall wordpress -n polycea-wordpress
+terraform destroy -var-file=./env/dev.tfvars
+```

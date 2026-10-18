@@ -18,8 +18,7 @@ securityContext:
 
 db:
   host: ""
-  user: ""
   name: ""
-  password: ""
+
 
 scName: efs-sc

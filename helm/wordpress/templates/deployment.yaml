@@ -66,11 +66,11 @@ spec:
             mountPath: {{ .Values.mountPath }}
         resources:
           requests:
-            cpu: "100m"
-            memory: "256Mi"
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
           limits:
-            cpu: "500m"
-            memory: "512Mi"
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
         readinessProbe:
           httpGet:
             path: /wp-login.php

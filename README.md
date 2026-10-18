@@ -50,7 +50,7 @@ Le réseau repose sur 1 VPC réparti sur 2 zones de disponibilité (AZ) sur la r
 Le cluster Kubernetes est managé par AWS EKS, on délègue à AWS la responsabilité des mises à jour, backups `etcd`, patch de sécurité et la haute disponibilité (EKS est multi-az).
 Les worker nodes sont déployés sur les sous-réseaux privés (distribué entre eux).
 
-EKS déploie automatiquement les Load Balancers pour les services K8S (si `type: LoadBalancer`), par défaut il s'agit de CLB (Classic Load Balancer) et EKS identifie les sous-réseaux valides à travers un tag.
+EKS déploie automatiquement les Load Balancers pour les services K8S (si `type: LoadBalancer`), EKS identifie les sous-réseaux valides à travers un tag.
 
 > [!NOTE]
 > Aucun mécanisme d'autoscaling (e.g. Karpenter) n'étant installé sur le cluster, les valeurs `min` et `max` ne déclenchent aucun redimensionnement automatique.
@@ -96,8 +96,8 @@ L'application WordPress est packagée sous forme d'un chart Helm personnalisé :
 L'authentification auprès d'AWS s'effectue via une fédération d'identité OIDC (OpenID Connect) entre GitHub et AWS IAM. 
 Deux rôles AWS sont utilisés pour ce pipeline :
 
-- `github-oidc-role-terraform-polycea-wp` : Provisionné par la stack `bootstrap`. Il accorde à Terraform la policy `AdministratorAccess` sur le compte AWS.
-- `github-oidc-role-helm-polycea-wp-${var.project_name_short}` : Provisionné par la stack `infra`. Il accorde au workflow Helm l'action AWS `eks:DescribeCluster` et associe l'access entry EKS `AmazonEKSEditPolicy` restreinte au namespace `polycea-wordpress`.
+- `github-oidc-role-terraform-poly-wp` : Provisionné par la stack `bootstrap`. Il accorde à Terraform la policy `AdministratorAccess` sur le compte AWS.
+- `github-oidc-role-helm-poly-wp-${var.project_name_short}` : Provisionné par la stack `infra`. Il accorde au workflow Helm l'action AWS `eks:DescribeCluster` et associe l'access entry EKS `AmazonEKSEditPolicy` restreinte au namespace `polycea-wordpress`.
 
 La chaîne se compose de 4 pipelines :
 

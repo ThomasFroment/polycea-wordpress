@@ -1,5 +1,7 @@
 resource "random_password" "rds" {
-  length = 16
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}:?"
 }
 
 resource "aws_db_instance" "this" {
@@ -13,7 +15,8 @@ resource "aws_db_instance" "this" {
   username = var.rds_username
   password = random_password.rds.result
 
-  skip_final_snapshot = var.rds_skip_final_snapshot
+  backup_retention_period = var.rds_backup_retention_period
+  skip_final_snapshot     = var.rds_skip_final_snapshot
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]

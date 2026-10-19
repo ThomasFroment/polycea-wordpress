@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-west-3"
+  region = var.aws_region
 
   default_tags {
     tags = {
@@ -20,12 +20,19 @@ provider "aws" {
   }
 }
 
-resource "aws_s3_bucket" "terraform_state" {
+resource "aws_s3_bucket" "this" {
   bucket        = "${var.project_name}-terraform-tfstate-bucket"
   force_destroy = true
 
   tags = {
     Name = "Terraform State Bucket"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 

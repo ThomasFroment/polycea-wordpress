@@ -91,3 +91,9 @@ variable "aws_region" {
   default     = "eu-west-3"
   type        = string
 }
+
+variable "rds_backup_retention_period" {
+  description = "The number of days to retain backups for the RDS instance."
+  default     = 1
+  type        = number
+}

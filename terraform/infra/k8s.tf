@@ -1,3 +1,5 @@
+# This file should have been a separate stack, but it is included in the "infra" stack for simplicity. It is not good practice 
+
 data "aws_eks_cluster_auth" "this" {
   name = aws_eks_cluster.this.name
 }
@@ -52,6 +54,29 @@ resource "kubernetes_secret_v1" "rds" {
   data = {
     username = aws_db_instance.this.username
     password = aws_db_instance.this.password
+  }
+
+  depends_on = [
+    aws_eks_cluster.this,
+    aws_eks_access_entry.this,
+    aws_eks_access_policy_association.this,
+  ]
+}
+
+resource "random_password" "wp" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}:?"
+}
+
+resource "kubernetes_secret_v1" "wp" {
+  metadata {
+    name      = "wp-credentials"
+    namespace = kubernetes_namespace_v1.this.metadata[0].name
+  }
+
+  data = {
+    password = random_password.wp.result
   }
 
   depends_on = [

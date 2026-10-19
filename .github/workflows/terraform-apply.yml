@@ -25,7 +25,7 @@ jobs:
   terraform-lint:
     uses: ./.github/workflows/terraform-lint.yml
 
-  terraform-apply:
+  terraform-plan:
     runs-on: ubuntu-latest
     needs: [terraform-lint]
 
@@ -41,6 +41,12 @@ jobs:
       - name: HashiCorp - Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
+      - name: Cache Terraform Providers
+        uses: actions/cache@v6
+        with:
+          path: ./terraform/infra/.terraform/providers
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/terraform/infra/.terraform.lock.hcl') }}
+
       - name: Terraform Init
         working-directory: ./terraform/infra
         run: terraform init
@@ -50,9 +56,48 @@ jobs:
         run: |
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
 
+      - name: Terraform Plan
+        working-directory: ./terraform/infra
+        env:
+          TF_VAR_eks_admin_role_arn: ${{ secrets.EKS_ADMIN_ROLE_ARN }}
+        run: |
+          terraform plan -var-file=./env/${{ inputs.environment }}.tfvars -input=false
+
+  terraform-apply:
+    runs-on: ubuntu-latest
+    needs: [terraform-plan]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ inputs.region }}
+
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Cache Terraform Providers
+        uses: actions/cache@v6
+        with:
+          path: ./terraform/infra/.terraform/providers
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/terraform/infra/.terraform.lock.hcl') }}
+
+      - name: Terraform Init
+        working-directory: ./terraform/infra
+        run: terraform init
+
+      - name: Terraform Workspace Select
+        working-directory: ./terraform/infra
+        run: |
+          terraform workspace select ${{ inputs.environment }}
+
       - name: Terraform Apply
         working-directory: ./terraform/infra
         env:
           TF_VAR_eks_admin_role_arn: ${{ secrets.EKS_ADMIN_ROLE_ARN }}
         run: |
-          terraform apply -var-file=./env/${{ inputs.environment }}.tfvars -auto-approve
+          terraform apply -var-file=./env/${{ inputs.environment }}.tfvars -auto-approve -input=false

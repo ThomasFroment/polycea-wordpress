@@ -20,13 +20,20 @@ provider "aws" {
   }
 }
 
-resource "aws_s3_bucket" "terraform_state" {
+resource "aws_s3_bucket" "this" {
   bucket        = "${var.project_name}-terraform-tfstate-bucket"
   force_destroy = true
 
   tags = {
     Name = "Terraform State Bucket"
   }
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+    bucket = aws_s3_bucket.this.id
+    versioning_configuration {
+      status = "Enabled"
+    }
 }
 
 resource "aws_iam_openid_connect_provider" "terraform_oidc" {

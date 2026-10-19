@@ -5,12 +5,12 @@ resource "random_password" "rds" {
 }
 
 resource "aws_db_instance" "this" {
-  allocated_storage = 20
-  db_name           = var.rds_db_name
-  engine            = "mysql"
-  engine_version    = "8.4.11"
-  instance_class    = var.rds_instance_type
-  storage_encrypted = true
+  allocated_storage          = 20
+  db_name                    = var.rds_db_name
+  engine                     = "mysql"
+  engine_version             = "8.4.11"
+  instance_class             = var.rds_instance_type
+  storage_encrypted          = true
   auto_minor_version_upgrade = true
 
   username = var.rds_username

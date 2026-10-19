@@ -101,5 +101,5 @@ jobs:
             --set db.host="$DB_HOST" \
             --set db.name="$DB_NAME" \
             --namespace "$K8S_NAMESPACE" \
-            --atomic \
+            --rollback-on-failure \
             --wait

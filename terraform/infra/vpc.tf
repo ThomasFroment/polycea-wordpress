@@ -4,6 +4,16 @@ resource "aws_vpc" "vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
+  lifecycle {
+    precondition {
+      condition = (
+        length(var.public_subnet_cidr_blocks) == length(var.private_subnet_cidr_blocks) &&
+        length(var.private_subnet_cidr_blocks) <= length(data.aws_availability_zones.available.names)
+      )
+      error_message = "Public and private subnet CIDR lists must have the same length, and must not exceed the number of AZs."
+    }
+  }
+
   tags = {
     Name = "VPC-${local.name_suffix}"
   }
@@ -24,7 +34,7 @@ resource "aws_subnet" "public" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name                     = "PublicSubnet-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    Name                     = "PublicSubnet-${count.index}-${local.name_suffix}"
     "kubernetes.io/role/elb" = "1"
   }
 }
@@ -36,28 +46,28 @@ resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "PrivateSubnet-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    Name = "PrivateSubnet-${count.index}-${local.name_suffix}"
   }
 }
 
 resource "aws_eip" "nat" {
-  count      = var.only_one_nat_gateway ? 1 : length(var.public_subnet_cidr_blocks)
+  count      = var.only_one_nat_gateway ? 1 : length(var.private_subnet_cidr_blocks)
   domain     = "vpc"
   depends_on = [aws_internet_gateway.igw]
 
   tags = {
-    Name = "EIP-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    Name = "EIP-${count.index}-${local.name_suffix}"
   }
 }
 
 resource "aws_nat_gateway" "nat" {
-  count         = var.only_one_nat_gateway ? 1 : length(var.public_subnet_cidr_blocks)
+  count         = var.only_one_nat_gateway ? 1 : length(var.private_subnet_cidr_blocks)
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
   depends_on    = [aws_internet_gateway.igw]
 
   tags = {
-    Name = "NAT-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    Name = "NAT-${count.index}-${local.name_suffix}"
   }
 }
 
@@ -84,7 +94,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "PrivateRT-${count.index == 0 ? "A" : "B"}-${local.name_suffix}"
+    Name = "PrivateRT-${count.index}-${local.name_suffix}"
   }
 }
 

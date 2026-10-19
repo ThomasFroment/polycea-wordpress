@@ -30,10 +30,10 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_s3_bucket_versioning" "this" {
-    bucket = aws_s3_bucket.this.id
-    versioning_configuration {
-      status = "Enabled"
-    }
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
 resource "aws_iam_openid_connect_provider" "terraform_oidc" {

@@ -18,6 +18,7 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: {{ .Values.securityContext.runAsUser }}
@@ -58,6 +59,7 @@ spec:
                 key: password
         securityContext:
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           capabilities:
             drop:
               - ALL
@@ -67,6 +69,8 @@ spec:
         volumeMounts:
           - name: uploads
             mountPath: {{ .Values.mountPath }}
+          - name: tmp
+            mountPath: /tmp
         resources:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}
@@ -94,3 +98,5 @@ spec:
         - name: uploads
           persistentVolumeClaim:
             claimName: "{{ .Release.Name }}-pvc"
+        - name: tmp
+          emptyDir: {}

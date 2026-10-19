@@ -62,3 +62,24 @@ resource "kubernetes_secret_v1" "rds" {
     aws_eks_access_policy_association.this,
   ]
 }
+
+resource "random_password" "wp" {
+  length = 16
+}
+
+resource "kubernetes_secret_v1" "wp" {
+  metadata {
+    name      = "wp-credentials"
+    namespace = kubernetes_namespace_v1.this.metadata[0].name
+  }
+
+  data = {
+    password = random_password.wp.result
+  }
+
+  depends_on = [
+    aws_eks_cluster.this,
+    aws_eks_access_entry.this,
+    aws_eks_access_policy_association.this,
+  ]
+}

@@ -50,9 +50,11 @@ spec:
               secretKeyRef:
                 name: rds-credentials
                 key: password
-          # This is a dummy value. This should not be used in production.
           - name: WORDPRESS_PASSWORD
-            value: "admin"
+            valueFrom:
+              secretKeyRef:
+                name: wp-credentials
+                key: password
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

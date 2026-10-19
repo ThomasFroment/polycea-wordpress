@@ -64,8 +64,8 @@ resource "kubernetes_secret_v1" "rds" {
 }
 
 resource "random_password" "wp" {
-  length = 16
-  special = true
+  length           = 16
+  special          = true
   override_special = "!#$%&*()-_=+[]{}:?"
 }
 

@@ -46,6 +46,12 @@ jobs:
       - name: HashiCorp - Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
+      - name: Cache Terraform Providers
+        uses: actions/cache@v6
+        with:
+          path: ./terraform/infra/.terraform/providers
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/terraform/infra/.terraform.lock.hcl') }}
+
       - name: Terraform Init
         working-directory: ./terraform/infra
         run: terraform init

@@ -1,3 +1,5 @@
+# This file should have been a separate stack, but it is included in the "infra" stack for simplicity. It is not good practice 
+
 data "aws_eks_cluster_auth" "this" {
   name = aws_eks_cluster.this.name
 }

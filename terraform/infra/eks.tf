@@ -8,7 +8,7 @@ resource "aws_eks_cluster" "this" {
   }
 
   vpc_config {
-    subnet_ids = [aws_subnet.private[0].id, aws_subnet.private[1].id]
+    subnet_ids = aws_subnet.private[*].id
   }
 
   tags = {
@@ -45,12 +45,12 @@ resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
   node_group_name = "eks-node-group-${local.name_suffix}"
   node_role_arn   = aws_iam_role.node.arn
-  subnet_ids      = [aws_subnet.private[0].id, aws_subnet.private[1].id]
+  subnet_ids      = aws_subnet.private[*].id
 
   scaling_config {
     desired_size = var.eks_desired_size
-    max_size     = var.eks_max_size
-    min_size     = var.eks_min_size
+    max_size     = var.eks_desired_size
+    min_size     = var.eks_desired_size
   }
 
   instance_types = var.eks_instance_types

@@ -8,6 +8,7 @@ resource "aws_db_instance" "this" {
   engine            = "mysql"
   engine_version    = "8.4.11"
   instance_class    = var.rds_instance_type
+  storage_encrypted = true
 
   username = var.rds_username
   password = random_password.rds.result

@@ -11,17 +11,23 @@ resource "aws_db_instance" "this" {
   engine_version    = "8.4.11"
   instance_class    = var.rds_instance_type
   storage_encrypted = true
+  auto_minor_version_upgrade = true
 
   username = var.rds_username
   password = random_password.rds.result
 
   backup_retention_period = var.rds_backup_retention_period
-  skip_final_snapshot     = var.rds_skip_final_snapshot
+
+  skip_final_snapshot       = var.rds_skip_final_snapshot
+  final_snapshot_identifier = "${var.rds_db_name}-final-snapshot-${formatdate("YYYYMMDDhhmmss", timestamp())}"
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]
 
   multi_az = var.rds_multi_az
+  blue_green_update {
+    enabled = var.rds_multi_az
+  }
 
   tags = {
     Name = "rds-${local.name_suffix}"

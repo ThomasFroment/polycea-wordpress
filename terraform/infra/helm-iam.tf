@@ -30,7 +30,7 @@ resource "aws_iam_role" "helm_oidc" {
   assume_role_policy = data.aws_iam_policy_document.helm_oidc.json
 }
 
-data "aws_iam_policy_document" "helm_oidc_assume_role" {
+data "aws_iam_policy_document" "helm_oidc_permissions" {
   statement {
     effect    = "Allow"
     actions   = ["eks:DescribeCluster"]
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "helm_oidc_assume_role" {
 resource "aws_iam_role_policy" "helm_oidc" {
   name   = "EKSDescribeCluster"
   role   = aws_iam_role.helm_oidc.id
-  policy = data.aws_iam_policy_document.helm_oidc_assume_role.json
+  policy = data.aws_iam_policy_document.helm_oidc_permissions.json
 }
 
 resource "aws_eks_access_entry" "helm_oidc" {

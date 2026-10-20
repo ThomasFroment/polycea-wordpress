@@ -1,0 +1,17 @@
+---
+# Source: wordpress/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "wordpress-pvc"
+  labels:
+    app: wordpress
+    release: wordpress
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      # Useless but required
+      storage: 10Gi

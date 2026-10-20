@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{ .Release.Name }}-deployment"
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -17,16 +18,15 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: {{ .Values.securityContext.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.runAsGroup }}
-        fsGroup: {{ .Values.securityContext.fsGroup }}
         seccompProfile:
           type: RuntimeDefault
       topologySpreadConstraints:
           - maxSkew: 1
-            topologyKey: kubernetes.io/hostname
+            topologyKey: topology.kubernetes.io/zone
             whenUnsatisfiable: ScheduleAnyway
             labelSelector: 
               matchLabels:

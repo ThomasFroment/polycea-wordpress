@@ -18,3 +18,8 @@ variable "aws_region" {
   default     = "eu-west-3"
   type        = string
 }
+
+variable "oidc_subject" {
+  description = "The OIDC subject for the GitHub Actions workflow."
+  type        = string
+}

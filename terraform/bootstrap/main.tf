@@ -21,8 +21,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "this" {
-  bucket        = "${var.project_name}-terraform-tfstate-bucket"
-  force_destroy = true
+  bucket = "${var.project_name}-terraform-tfstate-bucket"
 
   tags = {
     Name = "Terraform State Bucket"
@@ -33,6 +32,16 @@ resource "aws_s3_bucket_versioning" "this" {
   bucket = aws_s3_bucket.this.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
@@ -61,7 +70,7 @@ data "aws_iam_policy_document" "terraform_oidc" {
 
     condition {
       test     = "StringLike"
-      values   = ["repo:ThomasFroment@97841826/polycea-wordpress@1407865294:*"]
+      values   = [var.oidc_subject]
       variable = "token.actions.githubusercontent.com:sub"
     }
   }

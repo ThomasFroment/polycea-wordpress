@@ -13,8 +13,6 @@ service:
 
 securityContext:
   runAsUser: 1001
-  runAsGroup: 0
-  fsGroup: 0
 
 db:
   host: ""

@@ -2,8 +2,10 @@ name: "Helm Lint"
 
 on:
   workflow_call:
-  push:
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   helm-lint:

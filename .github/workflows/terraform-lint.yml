@@ -2,8 +2,10 @@ name: "Terraform Lint & Validate"
 
 on:
   workflow_call:
-  push:
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   terraform-lint:

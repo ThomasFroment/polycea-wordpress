@@ -16,10 +16,17 @@ on:
         required: true
         default: "eu-west-3"
         type: string
+  push:
+    branches:
+      - main
 
 permissions:
   id-token: write
   contents: read
+
+env:
+  TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'prod' }}
+  TARGET_REGION: ${{ github.event_name == 'workflow_dispatch' && inputs.region || 'eu-west-3' }}
 
 jobs:
   helm-lint:
@@ -41,7 +48,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ inputs.region }}
+          aws-region: ${{ env.TARGET_REGION }}
 
       - name: HashiCorp - Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -59,7 +66,7 @@ jobs:
       - name: Terraform Workspace Select
         working-directory: ./terraform/infra
         run: |
-          terraform workspace select ${{ inputs.environment }}
+          terraform workspace select ${{ env.TARGET_ENV }}
 
       - name: Terraform Output
         id: terraform-output
@@ -70,7 +77,7 @@ jobs:
           echo "rds_address=$(terraform output -raw rds_address)" >> $GITHUB_OUTPUT
           echo "k8s_namespace=$(terraform output -raw k8s_namespace)" >> $GITHUB_OUTPUT
           echo "helm_role_arn=$(terraform output -raw helm_role_arn)" >> $GITHUB_OUTPUT
-  
+
   helm-install:
     needs: [helm-lint, terraform-output]
     runs-on: ubuntu-latest
@@ -81,7 +88,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ needs.terraform-output.outputs.helm_role_arn }}
-          aws-region: ${{ inputs.region }}
+          aws-region: ${{ env.TARGET_REGION }}
 
       - name: Install Helm
         uses: azure/setup-helm@v5
@@ -89,7 +96,7 @@ jobs:
 
       - name: Configure kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ needs.terraform-output.outputs.eks_cluster_name }} --region ${{ inputs.region }}
+          aws eks update-kubeconfig --name ${{ needs.terraform-output.outputs.eks_cluster_name }} --region ${{ env.TARGET_REGION }}
 
       - name: Install wordpress Helm Chart
         env:

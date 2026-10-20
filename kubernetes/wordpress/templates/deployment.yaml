@@ -1,0 +1,97 @@
+---
+# Source: wordpress/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "wordpress-deployment"
+  namespace: polycea-wordpress
+  labels:
+    app: wordpress
+    release: wordpress
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wordpress
+      release: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        release: wordpress
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: topology.kubernetes.io/zone
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector: 
+              matchLabels:
+                app: wordpress
+                release: wordpress
+      containers:
+      - name: wordpress
+        image: "bitnami/wordpress@sha256:845d250ecd73f5e9b8ab2c42ab8b32407992456bab4dcb79547f2c0b7d25959b"
+        env:
+          - name: WORDPRESS_DATABASE_HOST
+            value: 
+          - name: WORDPRESS_DATABASE_NAME
+            value: 
+          - name: WORDPRESS_DATABASE_USER
+            valueFrom:
+              secretKeyRef:
+                name: rds-credentials
+                key: username
+          - name: WORDPRESS_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: rds-credentials
+                key: password
+          - name: WORDPRESS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: wp-credentials
+                key: password
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        ports:
+        - name: http
+          containerPort: 8080
+        volumeMounts:
+          - name: uploads
+            mountPath: /bitnami/wordpress/
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /wp-login.php
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /license.txt
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: "wordpress-pvc"

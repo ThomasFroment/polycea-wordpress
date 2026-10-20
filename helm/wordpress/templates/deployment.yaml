@@ -22,8 +22,6 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: {{ .Values.securityContext.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.runAsGroup }}
-        fsGroup: {{ .Values.securityContext.fsGroup }}
         seccompProfile:
           type: RuntimeDefault
       topologySpreadConstraints:

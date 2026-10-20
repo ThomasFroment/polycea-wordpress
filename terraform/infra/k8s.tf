@@ -34,7 +34,7 @@ resource "kubernetes_storage_class_v1" "this" {
     fileSystemId     = aws_efs_file_system.this.id
     directoryPerms   = "770"
     uid              = "1001"
-    gid              = "0"
+    gid              = "1001"
   }
 
   depends_on = [

@@ -19,7 +19,7 @@ resource "aws_db_instance" "this" {
   backup_retention_period = var.rds_backup_retention_period
 
   skip_final_snapshot       = var.rds_skip_final_snapshot
-  final_snapshot_identifier = "${var.rds_db_name}-final-snapshot-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  final_snapshot_identifier = var.rds_skip_final_snapshot ? null : "${var.rds_db_name}-final-snapshot"
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]

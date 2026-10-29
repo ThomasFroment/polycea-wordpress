@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: bitnami/wordpress
-  digest: 845d250ecd73f5e9b8ab2c42ab8b32407992456bab4dcb79547f2c0b7d25959b
+  digest: 92ee2bafcb226ccd845c280add9cc2bbb9f1122ec5fe0e63f9323a145e1989c1
 
 containerPort: 8080
 mountPath: /bitnami/wordpress/

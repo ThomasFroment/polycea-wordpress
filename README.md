@@ -87,7 +87,7 @@ EKS déploie automatiquement les Load Balancers pour les services K8S (si `type:
 - **Ressources** : `requests` et `limits` définies.
 - **Persistance** : PVC en `ReadWriteMany` sur la StorageClass EFS, pour partager les fichiers WordPress entre les réplicas.
 
-> [!WARNING]
+> [!NOTE]
 > `bitnami/wordpress` a été préférée à l'image officielle car elle tourne nativement en non-root et tolère la suppression complète des caps Linux.
 
 > [!CAUTION]
